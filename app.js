@@ -83,3 +83,4 @@ function aplicarFiltros() {
 }
 
 document.addEventListener('DOMContentLoaded', inicializarApp);
+
