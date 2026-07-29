@@ -2,19 +2,34 @@ name: Actualizar Datos Fantasy Diariamente
 
 on:
   schedule:
+<<<<<<< HEAD
     # Se ejecuta todos los días a las 07:00 AM (Hora UTC)
     - cron: '0 7 * * *'
   workflow_dispatch: # Permite ejecutarlo manualmente cuando quieras desde GitHub
+=======
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+>>>>>>> 5456e254af068d09da8e8af36f7855858a032222
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar código
+<<<<<<< HEAD
         uses: actions/checkout@v3
 
       - name: Configurar Python
         uses: actions/setup-python@v4
+=======
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+>>>>>>> 5456e254af068d09da8e8af36f7855858a032222
         with:
           python-version: '3.10'
 
@@ -23,8 +38,16 @@ jobs:
 
       - name: Guardar cambios en el repositorio
         run: |
+<<<<<<< HEAD
           git config --global user.name "Bot Fantasy"
           git config --global user.email "bot@fantasy.com"
           git add datos.json
           git commit -m "Auto-actualización de datos Fantasy" || exit 0
           git push
+=======
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add datos.json
+          git commit -m "Auto-actualización de datos Fantasy" || exit 0
+          git push
+>>>>>>> 5456e254af068d09da8e8af36f7855858a032222
