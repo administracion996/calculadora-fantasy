@@ -34,7 +34,7 @@
                     <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé, Pedri..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                 </div>
 
-                <!-- Desplegable con LOS 20 EQUIPOS -->
+                <!-- Desplegable Equipos -->
                 <div>
                     <label class="text-xs font-semibold text-slate-400">Equipo (20 Clubes)</label>
                     <select id="filtro-equipo" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
@@ -101,50 +101,45 @@
     </main>
 
     <script>
-        // Datos garantizados en memoria
+        // DATOS CON PRECIOS ESPECÍFICOS E INDEPENDIENTES PARA CADA JUEGO
         let datosGlobales = {
             biwenger: {
                 chollos: [
                     { nombre: "Lamine Yamal", equipo: "FC Barcelona", pos: "DEL", pts: "8.8", precio: "22.100.000 €", subida: "+ 450.000 €" },
+                    { nombre: "Kylian Mbappé", equipo: "Real Madrid", pos: "DEL", pts: "9.4", precio: "24.500.000 €", subida: "+ 680.000 €" },
                     { nombre: "Raphinha", equipo: "FC Barcelona", pos: "DEL", pts: "9.1", precio: "19.800.000 €", subida: "+ 520.000 €" },
                     { nombre: "Pedri", equipo: "FC Barcelona", pos: "MED", pts: "7.9", precio: "15.400.000 €", subida: "+ 210.000 €" },
-                    { nombre: "Robert Lewandowski", equipo: "FC Barcelona", pos: "DEL", pts: "8.4", precio: "18.200.000 €", subida: "- 150.000 €" },
-                    { nombre: "Kylian Mbappé", equipo: "Real Madrid", pos: "DEL", pts: "9.4", precio: "24.500.000 €", subida: "+ 680.000 €" },
-                    { nombre: "Jude Bellingham", equipo: "Real Madrid", pos: "MED", pts: "8.5", precio: "19.100.000 €", subida: "+ 190.000 €" },
-                    { nombre: "Vinícius Jr.", equipo: "Real Madrid", pos: "DEL", pts: "8.9", precio: "21.000.000 €", subida: "- 220.000 €" },
-                    { nombre: "Federico Valverde", equipo: "Real Madrid", pos: "MED", pts: "7.8", precio: "14.800.000 €", subida: "+ 140.000 €" },
                     { nombre: "Nico Williams", equipo: "Athletic Club", pos: "DEL", pts: "7.8", precio: "12.500.000 €", subida: "+ 310.000 €" },
-                    { nombre: "Iñaki Williams", equipo: "Athletic Club", pos: "DEL", pts: "7.4", precio: "10.800.000 €", subida: "+ 180.000 €" },
-                    { nombre: "Oihan Sancet", equipo: "Athletic Club", pos: "MED", pts: "7.1", precio: "8.400.000 €", subida: "+ 90.000 €" },
                     { nombre: "Antoine Griezmann", equipo: "Atlético de Madrid", pos: "DEL", pts: "7.6", precio: "13.800.000 €", subida: "+ 210.000 €" },
-                    { nombre: "Julián Alvarez", equipo: "Atlético de Madrid", pos: "DEL", pts: "7.5", precio: "15.200.000 €", subida: "+ 290.000 €" },
                     { nombre: "Ayoze Pérez", equipo: "Villarreal CF", pos: "DEL", pts: "7.9", precio: "11.200.000 €", subida: "+ 340.000 €" },
-                    { nombre: "Alex Baena", equipo: "Villarreal CF", pos: "MED", pts: "8.1", precio: "12.900.000 €", subida: "+ 260.000 €" },
-                    { nombre: "Iago Aspas", equipo: "Celta de Vigo", pos: "DEL", pts: "7.7", precio: "9.800.000 €", subida: "+ 120.000 €" },
-                    { nombre: "Oscar Mingueza", equipo: "Celta de Vigo", pos: "DEF", pts: "7.2", precio: "6.500.000 €", subida: "+ 150.000 €" },
-                    { nombre: "Giovani Lo Celso", equipo: "Real Betis", pos: "MED", pts: "8.0", precio: "11.500.000 €", subida: "+ 310.000 €" },
-                    { nombre: "Isco Alarcón", equipo: "Real Betis", pos: "MED", pts: "8.2", precio: "10.200.000 €", subida: "+ 190.000 €" },
-                    { nombre: "Mikel Oyarzabal", equipo: "Real Sociedad", pos: "DEL", pts: "6.9", precio: "8.900.000 €", subida: "- 80.000 €" },
-                    { nombre: "Takefusa Kubo", equipo: "Real Sociedad", pos: "DEL", pts: "7.3", precio: "9.400.000 €", subida: "+ 110.000 €" },
-                    { nombre: "Bryan Gil", equipo: "Girona FC", pos: "DEL", pts: "7.0", precio: "5.800.000 €", subida: "+ 140.000 €" },
-                    { nombre: "Dodi Lukebakio", equipo: "Sevilla FC", pos: "DEL", pts: "7.3", precio: "7.200.000 €", subida: "+ 230.000 €" },
-                    { nombre: "Ante Budimir", equipo: "CA Osasuna", pos: "DEL", pts: "7.5", precio: "8.100.000 €", subida: "+ 170.000 €" },
-                    { nombre: "Jorge de Frutos", equipo: "Rayo Vallecano", pos: "MED", pts: "6.8", precio: "4.200.000 €", subida: "+ 120.000 €" },
-                    { nombre: "Vedat Muriqi", equipo: "RCD Mallorca", pos: "DEL", pts: "7.1", precio: "6.900.000 €", subida: "+ 90.000 €" },
-                    { nombre: "Hugo Duro", equipo: "Valencia CF", pos: "DEL", pts: "6.7", precio: "5.400.000 €", subida: "+ 80.000 €" },
-                    { nombre: "Kike García", equipo: "Deportivo Alavés", pos: "DEL", pts: "6.5", precio: "3.100.000 €", subida: "+ 60.000 €" },
-                    { nombre: "Juan Cruz", equipo: "CD Leganés", pos: "DEL", pts: "6.9", precio: "3.800.000 €", subida: "+ 110.000 €" },
-                    { nombre: "Javi Puado", equipo: "RCD Espanyol", pos: "DEL", pts: "6.8", precio: "4.500.000 €", subida: "+ 90.000 €" },
-                    { nombre: "Raúl Moro", equipo: "Real Valladolid", pos: "DEL", pts: "6.7", precio: "3.400.000 €", subida: "+ 80.000 €" },
-                    { nombre: "Alberto Moleiro", equipo: "UD Las Palmas", pos: "MED", pts: "7.2", precio: "5.900.000 €", subida: "+ 130.000 €" },
-                    { nombre: "Mauro Arambarri", equipo: "Getafe CF", pos: "MED", pts: "6.9", precio: "4.100.000 €", subida: "+ 100.000 €" }
+                    { nombre: "Oscar Mingueza", equipo: "Celta de Vigo", pos: "DEF", pts: "7.2", precio: "6.500.000 €", subida: "+ 150.000 €" }
+                ]
+            },
+            laliga: {
+                chollos: [
+                    { nombre: "Lamine Yamal", equipo: "FC Barcelona", pos: "DEL", pts: "8.8", precio: "125.000.000 €", subida: "+ 1.450.000 €" },
+                    { nombre: "Kylian Mbappé", equipo: "Real Madrid", pos: "DEL", pts: "9.4", precio: "182.000.000 €", subida: "+ 2.100.000 €" },
+                    { nombre: "Raphinha", equipo: "FC Barcelona", pos: "DEL", pts: "9.1", precio: "110.000.000 €", subida: "+ 1.200.000 €" },
+                    { nombre: "Pedri", equipo: "FC Barcelona", pos: "MED", pts: "7.9", precio: "88.000.000 €", subida: "+ 850.000 €" },
+                    { nombre: "Nico Williams", equipo: "Athletic Club", pos: "DEL", pts: "7.8", precio: "78.500.000 €", subida: "+ 910.000 €" },
+                    { nombre: "Antoine Griezmann", equipo: "Atlético de Madrid", pos: "DEL", pts: "7.6", precio: "71.000.000 €", subida: "+ 650.000 €" },
+                    { nombre: "Ayoze Pérez", equipo: "Villarreal CF", pos: "DEL", pts: "7.9", precio: "58.000.000 €", subida: "+ 720.000 €" },
+                    { nombre: "Oscar Mingueza", equipo: "Celta de Vigo", pos: "DEF", pts: "7.2", precio: "34.000.000 €", subida: "+ 410.000 €" }
+                ]
+            },
+            comunio: {
+                chollos: [
+                    { nombre: "Lamine Yamal", equipo: "FC Barcelona", pos: "DEL", pts: "8.8", precio: "18.200.000 €", subida: "+ 280.000 €" },
+                    { nombre: "Kylian Mbappé", equipo: "Real Madrid", pos: "DEL", pts: "9.4", precio: "21.000.000 €", subida: "+ 410.000 €" },
+                    { nombre: "Raphinha", equipo: "FC Barcelona", pos: "DEL", pts: "9.1", precio: "16.500.000 €", subida: "+ 390.000 €" },
+                    { nombre: "Pedri", equipo: "FC Barcelona", pos: "MED", pts: "7.9", precio: "13.100.000 €", subida: "+ 180.000 €" },
+                    { nombre: "Nico Williams", equipo: "Athletic Club", pos: "DEL", pts: "7.8", precio: "10.200.000 €", subida: "+ 220.000 €" },
+                    { nombre: "Antoine Griezmann", equipo: "Atlético de Madrid", pos: "DEL", pts: "7.6", precio: "11.500.000 €", subida: "+ 140.000 €" },
+                    { nombre: "Ayoze Pérez", equipo: "Villarreal CF", pos: "DEL", pts: "7.9", precio: "9.400.000 €", subida: "+ 250.000 €" },
+                    { nombre: "Oscar Mingueza", equipo: "Celta de Vigo", pos: "DEF", pts: "7.2", precio: "5.400.000 €", subida: "+ 110.000 €" }
                 ]
             }
         };
-
-        // Copiar a LaLiga y Comunio por defecto
-        datosGlobales.laliga = JSON.parse(JSON.stringify(datosGlobales.biwenger));
-        datosGlobales.comunio = JSON.parse(JSON.stringify(datosGlobales.biwenger));
 
         let plataformaActual = 'biwenger';
 
@@ -208,7 +203,7 @@
                             <p class="text-slate-400 text-sm">⚽ ${j.equipo}</p>
                             <div class="text-sm space-y-1 pt-2 border-t border-slate-800">
                                 <p class="text-slate-300">📈 Tendencia: <strong class="${esSubida ? 'text-emerald-400' : 'text-red-400'}">${j.subida}</strong></p>
-                                <p class="text-slate-300">💰 Valor ${plataformaActual.toUpperCase()}: <strong>${j.precio}</strong></p>
+                                <p class="text-slate-300">💰 Valor ${plataformaActual.toUpperCase()}: <strong class="text-emerald-300">${j.precio}</strong></p>
                                 <p class="text-slate-300">⭐ Media: ${j.pts} pts</p>
                             </div>
                         </div>
@@ -217,7 +212,6 @@
             }
         }
 
-        // Cargar inmediatamente
         window.onload = function() {
             cambiarJuego('biwenger');
         };
