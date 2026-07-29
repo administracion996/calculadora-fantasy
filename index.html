@@ -1,103 +1,67 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Hub - Biwenger, LaLiga Fantasy & Comunio</title>
+    <title>FantasyHub - Chollos y Bajas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-    </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- ENCABEZADO -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="text-2xl">⚽</span>
-                <h1 class="text-xl font-bold text-emerald-400">Fantasy<span class="text-white">Hub</span></h1>
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 font-bold text-xl text-emerald-400">
+                <span>⚽</span> FantasyHub
             </div>
-            <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-300">
-                <a href="#chollos" class="hover:text-emerald-400 transition">Chollos</a>
-                <a href="#dudas" class="hover:text-emerald-400 transition">Bajas y Dudas</a>
+            <nav class="flex gap-6 text-sm font-medium text-slate-400">
+                <a href="#chollos" class="hover:text-white transition">Chollos</a>
+                <a href="#bajas" class="hover:text-white transition">Bajas y Dudas</a>
             </nav>
         </div>
     </header>
 
-    <!-- SECCIÓN HERO CON SELECTOR DE JUEGO -->
-    <main class="max-w-6xl mx-auto px-4 py-10 flex-grow">
-        <div class="text-center my-6">
-            <h2 class="text-3xl md:text-5xl font-extrabold text-white">
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-10 space-y-12">
+        <!-- Hero & Selector -->
+        <div class="text-center space-y-4">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
                 Elige tu Plataforma Fantasy
-            </h2>
-            <p class="text-slate-400 mt-2 text-base">
+            </h1>
+            <p class="text-slate-400 max-w-xl mx-auto">
                 Selecciona tu juego para ver valores de mercado y bajas actualizadas.
             </p>
-
-            <!-- BOTONES SELECTORES DE JUEGO -->
-            <div class="flex justify-center gap-3 mt-6">
-                <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="btn-juego px-5 py-2.5 rounded-xl font-bold text-sm transition bg-emerald-500 text-slate-950 shadow-lg">
-                    Biwenger
-                </button>
-                <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="btn-juego px-5 py-2.5 rounded-xl font-bold text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">
-                    LaLiga Fantasy
-                </button>
-                <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="btn-juego px-5 py-2.5 rounded-xl font-bold text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">
-                    Comunio
-                </button>
+            <div class="flex justify-center gap-3 pt-4">
+                <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="px-6 py-2.5 rounded-lg font-bold text-sm bg-emerald-500 text-slate-900 transition">Biwenger</button>
+                <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="px-6 py-2.5 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">LaLiga Fantasy</button>
+                <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="px-6 py-2.5 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Comunio</button>
             </div>
         </div>
 
-        <!-- TARJETAS DE CHOLLOS -->
-        <section id="chollos" class="mt-10">
-            <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+        <!-- Chollos -->
+        <section id="chollos" class="space-y-4">
+            <h2 class="text-2xl font-bold flex items-center gap-2 text-white">
                 🔥 Chollos y Subidas de Valor
-            </h3>
-            <div id="contenedor-chollos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Se rellena dinámicamente desde app.js -->
+            </h2>
+            <div id="lista-chollos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Se rellena con JS -->
             </div>
         </section>
 
-        <!-- SECCIÓN DE LESIONADOS Y SANCTIONADOS -->
-        <section id="dudas" class="mt-14">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <!-- Bajas -->
+        <section id="bajas" class="space-y-4">
+            <h2 class="text-2xl font-bold flex items-center gap-2 text-white">
                 🚨 Bajas, Dudas y Sancionados
-            </h3>
-
-            <div class="bg-slate-800/40 border border-slate-700/60 rounded-xl overflow-hidden backdrop-blur">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-800/80 text-slate-400 uppercase text-xs font-semibold border-b border-slate-700/60">
-                            <tr>
-                                <th class="py-3 px-4">Jugador</th>
-                                <th class="py-3 px-4">Equipo</th>
-                                <th class="py-3 px-4">Estado</th>
-                                <th class="py-3 px-4">Motivo / Detalle</th>
-                            </tr>
-                        </thead>
-                        <tbody id="contenedor-bajas" class="divide-y divide-slate-700/40 text-slate-200">
-                            <!-- Se rellena dinámicamente desde app.js -->
-                        </tbody>
-                    </table>
-                </div>
+            </h2>
+            <div id="lista-bajas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Se rellena con JS -->
             </div>
         </section>
-
     </main>
 
-    <!-- PIE DE PÁGINA -->el
-    <footer class="border-t border-slate-800 bg-slate-900 py-6 mt-12">
-        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-slate-500">
-            <p>© 2026 FantasyHub - Datos actualizados para Biwenger, LaLiga Fantasy y Comunio.</p>
-        </div>
+    <footer class="border-t border-slate-800 py-6 text-center text-slate-500 text-sm">
+        <p>© 2026 FantasyHub - Datos actualizados para Biwenger, LaLiga Fantasy y Comunio.</p>
     </footer>
 
-    <!-- VINCULACIÓN CON EL SCRIPT JAVASCRIPT -->
     <script src="app.js"></script>
 </body>
 </html>
