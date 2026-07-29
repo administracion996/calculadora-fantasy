@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasyHub - Buscador Completo de Jugadores</title>
+    <title>FantasyHub Pro - Mercado Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
@@ -13,7 +13,7 @@
             <div class="flex items-center gap-2 font-bold text-xl text-emerald-400">
                 <span>⚽</span> FantasyHub Pro
             </div>
-            <nav class="flex gap-4">
+            <nav class="flex gap-3">
                 <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-emerald-500 text-slate-900">Biwenger</button>
                 <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">LaLiga Fantasy</button>
                 <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">Comunio</button>
@@ -28,25 +28,37 @@
             <h2 class="text-xl font-bold text-white flex items-center gap-2">🔍 Buscador y Filtros de Mercado</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Nombre -->
+                <!-- Buscador -->
                 <div>
                     <label class="text-xs font-semibold text-slate-400">Buscar Jugador</label>
-                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé, Pedri..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                 </div>
 
-                <!-- Equipo -->
+                <!-- Desplegable con LOS 20 EQUIPOS DE LALIGA -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Equipo</label>
+                    <label class="text-xs font-semibold text-slate-400">Equipo (20 Clubes)</label>
                     <select id="filtro-equipo" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="todos">Todos los equipos</option>
-                        <option value="FC Barcelona">FC Barcelona</option>
-                        <option value="Real Madrid">Real Madrid</option>
-                        <option value="Atlético de Madrid">Atlético de Madrid</option>
+                        <option value="todos">Todos los equipos (20)</option>
                         <option value="Athletic Club">Athletic Club</option>
-                        <option value="Real Sociedad">Real Sociedad</option>
-                        <option value="Villarreal CF">Villarreal CF</option>
+                        <option value="Atlético de Madrid">Atlético de Madrid</option>
+                        <option value="CA Osasuna">CA Osasuna</option>
+                        <option value="CD Leganés">CD Leganés</option>
+                        <option value="Celta de Vigo">Celta de Vigo</option>
+                        <option value="Deportivo Alavés">Deportivo Alavés</option>
+                        <option value="FC Barcelona">FC Barcelona</option>
+                        <option value="Getafe CF">Getafe CF</option>
+                        <option value="Girona FC">Girona FC</option>
+                        <option value="Rayo Vallecano">Rayo Vallecano</option>
+                        <option value="RCD Espanyol">RCD Espanyol</option>
+                        <option value="RCD Mallorca">RCD Mallorca</option>
                         <option value="Real Betis">Real Betis</option>
+                        <option value="Real Madrid">Real Madrid</option>
+                        <option value="Real Sociedad">Real Sociedad</option>
+                        <option value="Real Valladolid">Real Valladolid</option>
                         <option value="Sevilla FC">Sevilla FC</option>
+                        <option value="UD Las Palmas">UD Las Palmas</option>
+                        <option value="Valencia CF">Valencia CF</option>
+                        <option value="Villarreal CF">Villarreal CF</option>
                     </select>
                 </div>
 
@@ -62,29 +74,27 @@
                     </select>
                 </div>
 
-                <!-- Precio Máximo -->
+                <!-- Filtro por Subida/Bajada o Precio -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Precio Máximo (€)</label>
-                    <select id="filtro-precio" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="infinito">Sin límite</option>
-                        <option value="1000000">Hasta 1.000.000 € (Chollos)</option>
-                        <option value="5000000">Hasta 5.000.000 €</option>
-                        <option value="10000000">Hasta 10.000.000 €</option>
-                        <option value="20000000">Hasta 20.000.000 €</option>
+                    <label class="text-xs font-semibold text-slate-400">Tendencia Mercado</label>
+                    <select id="filtro-tendencia" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="todos">Todas las tendencias</option>
+                        <option value="subida">🔥 Solo Chollos en Subida</option>
+                        <option value="bajada">📉 En Bajada de Precio</option>
                     </select>
                 </div>
             </div>
         </section>
 
-        <!-- RESULTADOS -->
+        <!-- RESULTADOS EN VIVO -->
         <section class="space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold text-white">📋 Mercado de Jugadores</h2>
-                <span id="contador-resultados" class="text-sm text-slate-400">Cargando jugadores...</span>
+                <span id="contador-resultados" class="text-sm text-emerald-400 font-semibold">Cargando base de datos...</span>
             </div>
             
             <div id="contenedor-jugadores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Tarjetas renderizadas por JS -->
+                <!-- Fichas renderizadas por JS -->
             </div>
         </section>
 
