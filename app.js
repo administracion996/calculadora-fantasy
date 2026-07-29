@@ -1,46 +1,24 @@
-// Datos simulados de los juegos (En la fase final, este objeto lo generará el bot automático)
-const datosJuegos = {
-    biwenger: {
-        chollos: [
-            { nombre: "Lamine Yamal", equipo: "FC Barcelona", pos: "DEL", subida: "+ 320.000 €", precio: "18.400.000 €", pts: "8.2" },
-            { nombre: "Brahim Díaz", equipo: "Real Madrid", pos: "MED", subida: "+ 210.000 €", precio: "5.100.000 €", pts: "6.1" },
-            { nombre: "Kirian Rodríguez", equipo: "Las Palmas", pos: "MED", subida: "+ 140.000 €", precio: "7.800.000 €", pts: "6.5" }
-        ],
-        bajas: [
-            { nombre: "Gavi", equipo: "FC Barcelona", estado: "🔴 Baja Confirmada", motivo: "Rotura de ligamento" },
-            { nombre: "Jude Bellingham", equipo: "Real Madrid", estado: "🟡 Duda", motivo: "Molestias en el hombro" }
-        ]
-    },
-    laliga: {
-        chollos: [
-            { nombre: "Kylian Mbappé", equipo: "Real Madrid", pos: "DEL", subida: "+ 500.000 €", precio: "62.000.000 €", pts: "9.1" },
-            { nombre: "Nico Williams", equipo: "Athletic Club", pos: "DEL", subida: "+ 290.000 €", precio: "35.500.000 €", pts: "7.4" },
-            { nombre: "Sancet", equipo: "Athletic Club", pos: "MED", subida: "+ 180.000 €", precio: "19.200.000 €", pts: "5.8" }
-        ],
-        bajas: [
-            { nombre: "Vinícius Jr.", equipo: "Real Madrid", estado: "🔴 Sancionado", motivo: "Acumulación de tarjetas" },
-            { nombre: "Isco Alarcón", equipo: "Real Betis", estado: "🟡 Duda", motivo: "Sobrecarga muscular" }
-        ]
-    },
-    comunio: {
-        chollos: [
-            { nombre: "Antoine Griezmann", equipo: "Atlético de Madrid", pos: "DEL", subida: "+ 150.000 €", precio: "12.300.000 €", pts: "7.0" },
-            { nombre: "Take Kubo", equipo: "Real Sociedad", pos: "DEL", subida: "+ 110.000 €", precio: "8.900.000 €", pts: "5.9" },
-            { nombre: "Aleix García", equipo: "Girona FC", pos: "MED", subida: "+ 90.000 €", precio: "9.500.000 €", pts: "6.8" }
-        ],
-        bajas: [
-            { nombre: "Mikel Oyarzabal", equipo: "Real Sociedad", estado: "🟡 Duda", motivo: "Evaluación médica" }
-        ]
-    }
-};
-
+let datosJuegos = {};
 let juegoActual = 'biwenger';
 
-// Función para cambiar de juego y renderizar los datos
+// Función para cargar el archivo datos.json actualizado por el robot
+async function cargarDatos() {
+    try {
+        const respuesta = await fetch('datos.json');
+        datosJuegos = await respuesta.json();
+        cambiarJuego('biwenger'); // Carga Biwenger por defecto
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+    }
+}
+
+// Función para cambiar de juego y renderizar en pantalla
 function cambiarJuego(juego) {
     juegoActual = juego;
 
-    // Actualizar estilo de los botones
+    if (!datosJuegos[juego]) return;
+
+    // Estilos de los botones
     document.querySelectorAll('.btn-juego').forEach(btn => {
         btn.classList.remove('bg-emerald-500', 'text-slate-950');
         btn.classList.add('bg-slate-800', 'text-slate-300');
@@ -52,7 +30,7 @@ function cambiarJuego(juego) {
         btnActivo.classList.add('bg-emerald-500', 'text-slate-950');
     }
 
-    // Renderizar Chollos
+    // Dibujar Chollos
     const contenedorChollos = document.getElementById('contenedor-chollos');
     contenedorChollos.innerHTML = datosJuegos[juego].chollos.map(item => `
         <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5 hover:border-emerald-500/50 transition">
@@ -72,7 +50,7 @@ function cambiarJuego(juego) {
         </div>
     `).join('');
 
-    // Renderizar Bajas
+    // Dibujar Bajas / Dudas
     const contenedorBajas = document.getElementById('contenedor-bajas');
     contenedorBajas.innerHTML = datosJuegos[juego].bajas.map(item => `
         <tr class="hover:bg-slate-800/50 transition">
@@ -88,7 +66,5 @@ function cambiarJuego(juego) {
     `).join('');
 }
 
-// Cargar Biwenger por defecto al iniciar
-document.addEventListener('DOMContentLoaded', () => {
-    cambiarJuego('biwenger');
-});
+// Iniciar la carga al abrir la web
+document.addEventListener('DOMContentLoaded', cargarDatos);
