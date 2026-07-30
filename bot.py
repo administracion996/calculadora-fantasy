@@ -2,128 +2,125 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_comuniate_filtro_exacto():
-    print("🤖 Entrando a Comuniate para accionar el filtro de LaLiga Fantasy...")
+def extraccion_comuniate_robusta():
+    print("🤖 Entrando a Comuniate (Modo jQuery y Extracción Robusta)...")
     jugadores_dict = {}
 
-    # Usamos SeleniumBase de fondo para poder interactuar con los desplegables
     with SB(uc=True, headless=True) as sb:
         try:
-            # 1. Vamos a la URL exacta que nos has pasado
             print("🌐 Abriendo la URL base...")
             sb.uc_open_with_reconnect("https://www.comuniate.com/jugadores/comunio", reconnect_time=4)
-            sb.sleep(3)
+            sb.sleep(4)
 
-            # 2. LA MAGIA: Hacemos clic en el desplegable de tu captura de pantalla
-            print("🔄 Seleccionando el filtro 'LALIGA FANTASY DAZN'...")
+            print("🔄 Cambiando el motor a LaLiga Fantasy DAZN (Vía jQuery)...")
+            # Forzamos el cambio usando jQuery (el lenguaje nativo de la web) para que reaccione
             sb.execute_script("""
-                let selects = document.querySelectorAll('select');
-                for(let s of selects) {
-                    for(let o of s.options) {
-                        if(o.text.toUpperCase().includes('LALIGA FANTASY DAZN')) {
-                            s.value = o.value;
-                            s.dispatchEvent(new Event('change', {bubbles: true}));
-                            break;
-                        }
+                if (typeof jQuery != 'undefined') {
+                    var $select = jQuery('select').filter(function() {
+                        return jQuery(this).text().indexOf('LALIGA FANTASY DAZN') > -1;
+                    });
+                    if ($select.length) {
+                        var val = $select.find('option:contains("LALIGA FANTASY DAZN")').val();
+                        $select.val(val).trigger('change');
                     }
                 }
             """)
-            sb.sleep(4) # Esperamos 4 segundos a que la tabla cambie los datos de Comunio a Fantasy
+            sb.sleep(5) # Vital esperar a que el servidor de Comuniate mande los nuevos jugadores
 
-            # 3. Forzamos el segundo desplegable (el de paginación) para mostrar TODOS los jugadores
-            print("📜 Expandiendo la tabla para que no muestre solo 10...")
+            print("📜 Expandiendo la paginación de la tabla al máximo...")
             sb.execute_script("""
-                let selects = document.querySelectorAll('select');
-                for(let s of selects) {
-                    // Los desplegables de paginación suelen tener 'length' en su name
-                    if(s.name && s.name.includes('length')) {
-                        // Seleccionamos la última opción (suele ser "Todos" o "100")
-                        s.value = s.options[s.options.length - 1].value;
-                        s.dispatchEvent(new Event('change', {bubbles: true}));
+                if (typeof jQuery != 'undefined') {
+                    var $lenSelect = jQuery('select[name$="length"]');
+                    if ($lenSelect.length) {
+                        $lenSelect.val($lenSelect.find('option:last').val()).trigger('change');
                     }
                 }
             """)
-            sb.sleep(3) # Esperamos a que carguen todos los jugadores de golpe
+            sb.sleep(5) # Esperar a que se pinte la tabla gigante
 
-            # 4. Le pasamos el código HTML a BeautifulSoup para leerlo a la velocidad de la luz
-            print("🔍 Analizando la tabla extraída...")
+            print("🔍 Leyendo el código fuente de la tabla...")
             html = sb.get_page_source()
             soup = BeautifulSoup(html, 'html.parser')
 
-            filas = soup.find_all('tr')
-            for fila in filas:
-                celdas = fila.find_all(['td', 'th'])
-                textos = [c.get_text(strip=True) for c in celdas if c.get_text(strip=True)]
+            # Buscamos todas las tablas y filtramos las filas de datos reales
+            tablas = soup.find_all('table')
+            for tabla in tablas:
+                filas = tabla.find_all('tr')
+                for fila in filas:
+                    celdas = fila.find_all('td')
+                    
+                    # Una fila válida de jugadores suele tener al menos 4 columnas
+                    if len(celdas) >= 4:
+                        textos = [c.get_text(strip=True, separator=" ") for c in celdas]
+                        
+                        nombre = ""
+                        # Normalmente el nombre está en un enlace (etiqueta <a>)
+                        a_tag = fila.find('a')
+                        if a_tag and len(a_tag.get_text(strip=True)) > 2:
+                            nombre = a_tag.get_text(strip=True)
+                        else:
+                            # Plan B: buscar el texto más largo que no tenga números (suele ser el nombre)
+                            for txt in textos:
+                                if len(txt) > 3 and not any(char.isdigit() for char in txt) and '€' not in txt:
+                                    nombre = txt
+                                    break
 
-                if len(textos) >= 3:
-                    # Buscar el nombre (normalmente es un enlace)
-                    nombre = ""
-                    a_tag = fila.find('a')
-                    if a_tag and len(a_tag.get_text(strip=True)) > 2:
-                        nombre = a_tag.get_text(strip=True)
-                    else:
-                        for t in textos:
-                            if len(t) > 3 and not t.replace('.', '').isdigit() and '€' not in t:
-                                nombre = t
+                        if not nombre or nombre.upper() in ["JUGADOR", "NOMBRE", "EQUIPO", "POSICIÓN"]:
+                            continue
+
+                        # Identificar el precio (buscando el símbolo del euro o números grandes)
+                        precio = "0 €"
+                        for txt in textos:
+                            if '€' in txt:
+                                precio = txt.replace('€', '').strip() + " €"
+                            elif len(txt.replace('.', '').replace(',', '')) >= 6 and txt.replace('.', '').isdigit():
+                                precio = txt.strip() + " €"
+
+                        # Identificar puntos (números pequeños de 1 a 4 dígitos)
+                        pts = "0.0"
+                        for txt in textos:
+                            if len(txt) <= 4 and txt.replace('.', '').isdigit():
+                                pts = txt
+
+                        # Identificar la posición
+                        pos = "JUG"
+                        for txt in textos:
+                            txt_up = txt.upper()
+                            if txt_up in ['POR', 'DEF', 'MED', 'DEL', 'PT', 'DF', 'MC', 'DL']:
+                                pos_map = {'PT': 'POR', 'DF': 'DEF', 'MC': 'MED', 'DL': 'DEL'}
+                                pos = pos_map.get(txt_up, txt_up)
+
+                        # Extraer el equipo (del texto alternativo del escudo del equipo)
+                        equipo = "LaLiga"
+                        imgs = fila.find_all('img')
+                        for img in imgs:
+                            alt = img.get('alt', '')
+                            if alt and 'FOTO' not in alt.upper() and 'JUGADOR' not in alt.upper():
+                                equipo = alt.title()
                                 break
 
-                    # Si es la cabecera de la tabla, la saltamos
-                    if not nombre or nombre.upper() in ["JUGADOR", "POSICIÓN", "EQUIPO", "PUNTOS", "VALOR", "NOMBRE"]:
-                        continue
-
-                    # Buscar el equipo extrayendo el "alt" de la foto del escudo
-                    equipo = "LaLiga"
-                    imgs = fila.find_all('img')
-                    for img in imgs:
-                        alt = img.get('alt', '').upper()
-                        if alt and len(alt) > 2 and 'FOTO' not in alt and 'AVATAR' not in alt:
-                            equipo = alt.title()
-                            break
-
-                    # Identificar variables heurísticamente (precio, posición, puntos)
-                    pos = "JUG"
-                    precio = "0 €"
-                    pts = "0.0"
-
-                    for txt in textos:
-                        txt_up = txt.upper()
-                        if txt_up in ['POR', 'DEF', 'MED', 'DEL', 'PT', 'DF', 'MC', 'DL']:
-                            pos_map = {'PT': 'POR', 'DF': 'DEF', 'MC': 'MED', 'DL': 'DEL'}
-                            pos = pos_map.get(txt_up, txt_up)
-                        
-                        elif '€' in txt or (txt.replace('.', '').replace(',', '').isdigit() and len(txt.replace('.', '')) >= 5):
-                            val_limpio = txt.replace('€', '').replace('.', '').replace(',', '').strip()
-                            if val_limpio.isdigit():
-                                precio = f"{int(val_limpio):,} €".replace(',', '.')
-                        
-                        elif len(txt) <= 4 and txt.replace('.', '').replace(',', '').isdigit():
-                            pts = txt
-
-                    if nombre not in jugadores_dict:
-                        jugadores_dict[nombre] = {
-                            "nombre": nombre,
-                            "equipo": equipo,
-                            "pos": pos,
-                            "precio": precio,
-                            "subida": "0 €", # La subida no suele salir en esta vista general
-                            "pts": pts
-                        }
-
+                        # Lo guardamos en nuestra base de datos si es válido
+                        if nombre not in jugadores_dict:
+                            jugadores_dict[nombre] = {
+                                "nombre": nombre, "equipo": equipo, "pos": pos,
+                                "precio": precio, "subida": "0 €", "pts": pts
+                            }
+                            
         except Exception as e:
-            print(f"❌ Error durante el asalto: {e}")
+            print(f"❌ Error crítico en la matriz: {e}")
 
-    # Guardado de datos
+    # Guardado de la base de datos
     resultado = list(jugadores_dict.values())
     if resultado:
-        # Ordenar por precio descendente
+        # Ordenamos los chollos de más caro a más barato para tu web
         resultado.sort(key=lambda x: int(x["precio"].replace(" €", "").replace(".", "")) if "€" in x["precio"] else 0, reverse=True)
         
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡GOLPE MAESTRO! Extraídos {len(resultado)} jugadores con el filtro de LaLiga Fantasy.")
+        print(f"✅ ¡MISIÓN CUMPLIDA! Extraídos {len(resultado)} jugadores con éxito.")
     else:
-        print("❌ No se guardó ningún jugador. La tabla podría estar vacía o bloqueada.")
+        print("❌ El robot se ha quedado ciego de nuevo. No pudo extraer las celdas de la tabla.")
 
 if __name__ == "__main__":
-    extraccion_comuniate_filtro_exacto()
+    extraccion_comuniate_robusta()
