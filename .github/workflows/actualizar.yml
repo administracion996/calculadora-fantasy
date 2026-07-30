@@ -1,9 +1,9 @@
 name: Actualizar Datos Fantasy Diariamente
 
 on:
-  workflow_dispatch: # Permite ejecutarlo manualmente cuando quieras
+  workflow_dispatch:
   schedule:
-    - cron: '0 5 * * *' # Se ejecuta automáticamente TODAS LAS NOCHES a las 5:00 AM UTC (6:00/7:00 AM España)
+    - cron: '0 5 * * *'
 
 permissions:
   contents: write
@@ -20,7 +20,7 @@ jobs:
           python-version: '3.x'
 
       - name: Instalar librerías
-        run: pip install requests beautifulsoup4
+        run: pip install requests cloudscraper
 
       - name: Ejecutar Robot
         run: python bot.py
@@ -30,5 +30,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add datos.json
-          git commit -m "Auto-actualización nocturna de la base de datos Fantasy" || echo "Sin cambios"
+          git commit -m "Extraccion directa 100% de Analitica Fantasy" || echo "Sin cambios"
           git push
