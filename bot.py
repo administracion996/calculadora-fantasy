@@ -2,140 +2,109 @@ import json
 import time
 from playwright.sync_api import sync_playwright
 
-def extraer_mercado_completo():
-    print("🤖 Navegando a Analítica Fantasy para extraer el objeto de datos completo...")
+def extraer_mercado_paginado():
+    print("🤖 Iniciando navegación interactiva por páginas en Analítica Fantasy...")
     
-    jugadores_totales = []
+    jugadores_totales = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            viewport={"width": 1400, "height": 900}
         )
         page = context.new_page()
 
         try:
-            # Cargar la página
+            # 1. Cargar la URL exacta de Analítica Fantasy
             page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="networkidle")
-            time.sleep(5)
+            time.sleep(4)
 
-            # Extraer directamente del objeto JS interno __NEXT_DATA__ de la página web
-            datos_js = page.evaluate("""() => {
-                try {
-                    const el = document.getElementById('__NEXT_DATA__');
-                    if (el) return JSON.parse(el.textContent);
-                } catch (e) {}
-                return null;
-            }""")
+            # 2. Intentar cambiar el selector de "Filas por página" si existe a la opción máxima
+            try:
+                select_elem = page.query_selector("select")
+                if select_elem:
+                    options = select_elem.query_selector_all("option")
+                    if len(options) > 1:
+                        select_elem.select_option(index=len(options) - 1)
+                        time.sleep(3)
+            except Exception:
+                pass
 
-            if datos_js:
-                print("📦 Objeto __NEXT_DATA__ localizado. Buscando la lista de jugadores...")
-                
-                # Función para buscar la lista masiva dentro de la estructura de Next.js
-                def buscar_lista(obj):
-                    if isinstance(obj, dict):
-                        for k, v in obj.items():
-                            if isinstance(v, list) and len(v) > 20 and isinstance(v[0], dict):
-                                return v
-                            res = buscar_lista(v)
-                            if res: return res
-                    elif isinstance(obj, list):
-                        for item in obj:
-                            res = buscar_lista(item)
-                            if res: return res
-                    return None
+            pagina_num = 1
+            max_paginas = 60  # Límite alto para recorrer todo el mercado
 
-                raw_list = buscar_lista(datos_js)
-                
-                if raw_list:
-                    for p_item in raw_list:
-                        nombre = p_item.get("nickname", p_item.get("name", "Jugador"))
-                        equipo = p_item.get("teamName", p_item.get("team", {}).get("name", "LaLiga"))
-                        pos = str(p_item.get("position", "MED"))
+            while pagina_num <= max_paginas:
+                # Extraer las filas de la tabla visibles en la página actual
+                filas = page.query_selector_all("tbody tr")
+                nuevos_en_esta_pag = 0
+
+                for fila in filas:
+                    celdas = fila.query_selector_all("td")
+                    if len(celdas) >= 4:
+                        textos_nombre = celdas[0].inner_text().strip().split("\n")
+                        nombre = textos_nombre[0].strip() if textos_nombre else ""
                         
-                        pos_map = {"1": "POR", "2": "DEF", "3": "MED", "4": "DEL"}
-                        pos = pos_map.get(pos, pos)
-                        
-                        precio = p_item.get("marketValue", p_item.get("price", 0))
-                        incremento = p_item.get("marketValueIncrement", p_item.get("priceIncrement", 0))
-                        puntos = str(p_item.get("pointsAverage", p_item.get("points", 0)))
-
-                        if isinstance(incremento, (int, float)):
-                            str_subida = f"+ {incremento:,} €".replace(',', '.') if incremento >= 0 else f"- {abs(incremento):,} €".replace(',', '.')
-                        else:
-                            str_subida = str(incremento)
-
-                        str_precio = f"{precio:,} €".replace(',', '.') if isinstance(precio, (int, float)) else str(precio)
-
-                        jugadores_totales.append({
-                            "nombre": nombre,
-                            "equipo": equipo,
-                            "pos": pos,
-                            "precio": str_precio,
-                            "subida": str_subida,
-                            "pts": puntos
-                        })
-
-            # Si la extracción por __NEXT_DATA__ falló, intentamos hacer scroll progresivo evaluando la tabla en vivo
-            if not jugadores_totales:
-                print("⚠️ Buscando mediante scroll y evaluación continua en el cliente...")
-                jugadores_dict = {}
-
-                for _ in range(15):
-                    # Forzar scroll
-                    page.evaluate("window.scrollBy(0, 1500)")
-                    time.sleep(1)
-
-                    # Extraer del DOM los elementos cargados dinámicamente
-                    filas_data = page.evaluate("""() => {
-                        const trs = document.querySelectorAll('tbody tr');
-                        const data = [];
-                        trs.forEach(tr => {
-                            const tds = tr.querySelectorAll('td');
-                            if (tds.length >= 4) {
-                                data.push({
-                                    nombre: tds[0].innerText.trim().split('\\n')[0],
-                                    equipo: tds[1] ? tds[1].innerText.trim().split('\\n')[0] : 'LaLiga',
-                                    precio: tds[2] ? tds[2].innerText.trim().split('\\n')[0] : '0 €',
-                                    subida: tds[3] ? tds[3].innerText.trim().split('\\n')[0] : '0 €',
-                                    pts: tds[4] ? tds[4].innerText.trim().split('\\n')[0] : '0.0'
-                                });
-                            }
-                        });
-                        return data;
-                    }""")
-
-                    for item in filas_data:
-                        nom = item["nombre"]
-                        if nom and nom[0].isdigit():
-                            partes = nom.split()
+                        # Limpiar número de posición/ranking si lo lleva pegado
+                        if nombre and nombre[0].isdigit():
+                            partes = nombre.split()
                             if len(partes) > 1 and partes[0].isdigit():
-                                nom = " ".join(partes[1:])
+                                nombre = " ".join(partes[1:])
 
-                        if nom and nom not in jugadores_dict:
-                            jugadores_dict[nom] = {
-                                "nombre": nom,
-                                "equipo": item["equipo"],
+                        equipo = celdas[1].inner_text().strip().split("\n")[0] if len(celdas) > 1 else "LaLiga"
+                        precio = celdas[2].inner_text().strip().split("\n")[0] if len(celdas) > 2 else "0 €"
+                        subida = celdas[3].inner_text().strip().split("\n")[0] if len(celdas) > 3 else "0 €"
+                        pts = celdas[4].inner_text().strip().split("\n")[0] if len(celdas) > 4 else "0.0"
+
+                        if nombre and nombre not in jugadores_totales:
+                            jugadores_totales[nombre] = {
+                                "nombre": nombre,
+                                "equipo": equipo,
                                 "pos": "JUG",
-                                "precio": item["precio"],
-                                "subida": item["subida"],
-                                "pts": item["pts"]
+                                "precio": precio,
+                                "subida": subida,
+                                "pts": pts
                             }
+                            nuevos_en_esta_pag += 1
 
-                jugadores_totales = list(jugadores_dict.values())
+                print(f"📄 Página {pagina_num}: extraídos {len(filas)} elementos (Total acumulado: {len(jugadores_totales)})")
 
-            if jugadores_totales:
-                base_datos = {"laliga": {"chollos": jugadores_totales}}
+                # Buscar el botón para ir a la siguiente página
+                # Probamos selectores comunes de paginación (botón '>', 'Siguiente', icono o la siguiente página numérica)
+                bot_siguiente = page.query_selector("button:has-text('>'), [aria-label*='Next'], [aria-label*='siguiente'], .pagination-next, button.next")
+                
+                # Si no lo encuentra por texto/aria, intentar hacer clic en el botón con el número de la siguiente página
+                if not bot_siguiente:
+                    bot_siguiente = page.query_selector(f"button:has-text('{pagina_num + 1}'), a:has-text('{pagina_num + 1}')")
+
+                if bot_siguiente and bot_siguiente.is_visible() and bot_siguiente.is_enabled():
+                    bot_siguiente.click()
+                    time.sleep(2)
+                    pagina_num += 1
+                else:
+                    # Si no hay más botones de paginación, intentamos scroll por si es tabla infinita
+                    page.evaluate("window.scrollBy(0, 1000)")
+                    time.sleep(1.5)
+                    filas_nuevas = page.query_selector_all("tbody tr")
+                    if len(filas_nuevas) <= len(filas) and nuevos_en_esta_pag == 0:
+                        print("🏁 Fin de la tabla alcanzado.")
+                        break
+                    pagina_num += 1
+
+            resultado = list(jugadores_totales.values())
+
+            if resultado:
+                base_datos = {"laliga": {"chollos": resultado}}
                 with open("datos.json", "w", encoding="utf-8") as f:
                     json.dump(base_datos, f, ensure_ascii=False, indent=4)
-                print(f"✅ ¡ÉXITO! Extraídos {len(jugadores_totales)} jugadores de Analítica Fantasy.")
+                print(f"✅ ¡ÉXITO MASIVO! Guardados {len(resultado)} jugadores de Analítica Fantasy.")
             else:
-                print("❌ No se pudieron obtener jugadores.")
+                print("❌ No se pudieron capturar datos de la tabla.")
 
         except Exception as e:
-            print(f"❌ Error durante la extracción: {e}")
+            print(f"❌ Error durante el raspado: {e}")
         finally:
             browser.close()
 
 if __name__ == "__main__":
-    extraer_mercado_completo()
+    extraer_mercado_paginado()
