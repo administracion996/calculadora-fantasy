@@ -2,10 +2,10 @@ import json
 import time
 from playwright.sync_api import sync_playwright
 
-def extraer_todo_analitica():
-    print("🤖 Lanzando navegador para capturar la base de datos completa de Analítica Fantasy...")
+def extraer_todos_los_jugadores():
+    print("🤖 Iniciando navegador para extraer la lista completa de Analítica Fantasy...")
     
-    jugadores_capturados = []
+    jugadores_totales = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -14,90 +14,84 @@ def extraer_todo_analitica():
         )
         page = context.new_page()
 
-        # Interceptamos las respuestas HTTP de la web para cazar el JSON con la lista masiva
-        def manejar_respuesta(response):
-            nonlocal jugadores_capturados
-            try:
-                # Buscamos respuestas JSON que contengan datos de jugadores / mercado / chollos
-                if "json" in response.headers.get("content-type", ""):
-                    data = response.json()
-                    lista = []
-                    if isinstance(data, list):
-                        lista = data
-                    elif isinstance(data, dict):
-                        lista = data.get("players", data.get("data", data.get("chollos", [])))
-                    
-                    if isinstance(lista, list) and len(lista) > 5:
-                        for item in lista:
-                            if isinstance(item, dict) and ("name" in item or "nickname" in item):
-                                nombre = item.get("nickname", item.get("name", "Jugador"))
-                                equipo = item.get("teamName", item.get("team", {}).get("name", "LaLiga"))
-                                pos = str(item.get("position", "MED"))
-                                pos_map = {"1": "POR", "2": "DEF", "3": "MED", "4": "DEL"}
-                                pos = pos_map.get(pos, pos)
-                                
-                                precio = item.get("marketValue", item.get("price", 0))
-                                incremento = item.get("marketValueIncrement", item.get("priceIncrement", 0))
-                                puntos = str(item.get("pointsAverage", item.get("points", 0)))
-
-                                str_subida = f"+ {incremento:,} €".replace(',', '.') if incremento >= 0 else f"- {abs(incremento):,} €".replace(',', '.')
-
-                                jugadores_capturados.append({
-                                    "nombre": nombre,
-                                    "equipo": equipo,
-                                    "pos": pos,
-                                    "precio": f"{precio:,} €".replace(',', '.') if isinstance(precio, int) else str(precio),
-                                    "subida": str_subida,
-                                    "pts": puntos
-                                })
-            except Exception:
-                pass
-
-        # Escuchar todo el tráfico de red de la web
-        page.on("response", manejar_respuesta)
-
         try:
             page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="networkidle")
             time.sleep(3)
 
-            # Si no capturó la API de red, hacemos auto-scroll hacia abajo para forzar la carga de más jugadores
-            print("📜 Haciendo scroll dinámico para desplegar la lista entera...")
-            for _ in range(15):
-                page.evaluate("window.scrollBy(0, 1000)")
-                time.sleep(0.5)
+            # Intentar cambiar el selector de "Filas por página" a "Mostrar todos" o 100 si existe
+            try:
+                selectores = page.query_selector_all("select")
+                for sel in selectores:
+                    opciones = sel.inner_text()
+                    if "10" in opciones or "20" in opciones or "50" in opciones:
+                        sel.select_option(index=-1) # Seleccionar la opción más grande (ej: Todos / 100)
+                        time.sleep(2)
+            except Exception:
+                pass
 
-            # Si la intercepción de red no saltó, extraemos de los componentes DOM de la página limpiando campos
-            if not jugadores_capturados:
-                print("⚠️ Extrayendo directamente del selector visual de la página...")
+            # Bucle para recorrer todas las páginas disponibles
+            pagina_actual = 1
+            max_paginas = 60 # Límite de seguridad para recorrer todo el mercado
+
+            while pagina_actual <= max_paginas:
+                print(f"📄 Extrayendo datos de la página {pagina_actual}...")
+                
+                # Extraer filas visibles de la tabla
                 filas = page.query_selector_all("tbody tr")
+                cant_previo = len(jugadores_totales)
+
                 for fila in filas:
                     textos = [t.strip() for t in fila.inner_text().split("\n") if t.strip()]
                     if len(textos) >= 3:
-                        jugadores_capturados.append({
-                            "nombre": textos[0],
-                            "equipo": textos[1] if len(textos) > 1 else "LaLiga",
-                            "pos": "JUG",
-                            "precio": textos[2] if len(textos) > 2 else "0 €",
-                            "subida": textos[3] if len(textos) > 3 else "0 €",
-                            "pts": textos[4] if len(textos) > 4 else "0.0"
-                        })
+                        nombre = textos[0]
+                        # Limpiar nombre por si trae número de posición
+                        if nombre and nombre[0].isdigit():
+                            nombre = " ".join(nombre.split()[1:])
 
-            # Eliminar duplicados si los hubiera
-            jugadores_unicos = {j["nombre"]: j for j in jugadores_capturados}.values()
-            lista_final = list(jugadores_unicos)
+                        equipo = textos[1] if len(textos) > 1 else "LaLiga"
+                        precio = textos[2] if len(textos) > 2 else "0 €"
+                        subida = textos[3] if len(textos) > 3 else "0 €"
+                        pts = textos[4] if len(textos) > 4 else "0.0"
+
+                        jugadores_totales[nombre] = {
+                            "nombre": nombre,
+                            "equipo": equipo,
+                            "pos": "JUG",
+                            "precio": precio,
+                            "subida": subida,
+                            "pts": pts
+                        }
+
+                # Buscar botón "Siguiente" o ">" para pasar de página
+                bot_siguiente = page.query_selector("button:has-text('>'), button:has-text('Siguiente'), [aria-label*='next'], .pagination-next")
+                
+                if bot_siguiente and bot_siguiente.is_enabled():
+                    bot_siguiente.click()
+                    time.sleep(1.5)
+                    pagina_actual += 1
+                else:
+                    # Intento alternativo: hacer scroll si no hay botones de página
+                    page.evaluate("window.scrollBy(0, 800)")
+                    time.sleep(1)
+                    if len(jugadores_totales) == cant_previo and pagina_actual > 3:
+                        print("🏁 No hay más páginas o jugadores nuevos.")
+                        break
+                    pagina_actual += 1
+
+            lista_final = list(jugadores_totales.values())
 
             if lista_final:
                 base_datos = {"laliga": {"chollos": lista_final}}
                 with open("datos.json", "w", encoding="utf-8") as f:
                     json.dump(base_datos, f, ensure_ascii=False, indent=4)
-                print(f"✅ ¡ÉXITO TOTAL! Capturados {len(lista_final)} jugadores reales de Analítica Fantasy.")
+                print(f"✅ ¡ÉXITO MASIVO! Extraídos {len(lista_final)} jugadores reales de Analítica Fantasy.")
             else:
-                print("❌ No se pudieron capturar filas.")
+                print("❌ No se pudieron capturar los datos.")
 
         except Exception as e:
-            print(f"❌ Error al navegar: {e}")
+            print(f"❌ Error durante el raspado: {e}")
         finally:
             browser.close()
 
 if __name__ == "__main__":
-    extraer_todo_analitica()
+    extraer_todos_los_jugadores()
