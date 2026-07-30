@@ -3,7 +3,7 @@ from seleniumbase import SB
 from bs4 import BeautifulSoup
 
 def extraccion_tarjetas_comuniate():
-    print("🤖 Iniciando asalto (Escáner de Tarjetas de Jugador por Anclaje Visual)...")
+    print("🤖 Iniciando asalto (Escáner de Tarjetas con Diccionario de Equipos Activo)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -13,13 +13,29 @@ def extraccion_tarjetas_comuniate():
         'DL': 'DEL', 'DEL': 'DEL'
     }
 
-    equipos_laliga = [
-        "Athletic", "Atlético", "Osasuna", "Leganés", "Alavés", 
-        "Barcelona", "Getafe", "Girona", "Rayo", "Celta", 
-        "Espanyol", "Mallorca", "Betis", "Madrid", "Real Madrid",
-        "Sociedad", "Valladolid", "Sevilla", "Las Palmas", 
-        "Valencia", "Villarreal"
-    ]
+    # Diccionario implacable: Si encuentra la palabra clave (izq), pone el nombre oficial (der)
+    mapa_equipos = {
+        "athletic": "Athletic Club",
+        "atletico": "Atlético de Madrid",
+        "osasuna": "CA Osasuna",
+        "leganes": "CD Leganés",
+        "alaves": "D. Alavés",
+        "barcelona": "FC Barcelona",
+        "getafe": "Getafe CF",
+        "girona": "Girona FC",
+        "rayo": "Rayo Vallecano",
+        "celta": "RC Celta",
+        "espanyol": "RCD Espanyol",
+        "mallorca": "RCD Mallorca",
+        "betis": "Real Betis",
+        "madrid": "Real Madrid",
+        "sociedad": "Real Sociedad",
+        "valladolid": "Real Valladolid",
+        "sevilla": "Sevilla FC",
+        "palmas": "UD Las Palmas",
+        "valencia": "Valencia CF",
+        "villarreal": "Villarreal CF"
+    }
 
     with SB(uc=True, headless=True) as sb:
         try:
@@ -46,7 +62,7 @@ def extraccion_tarjetas_comuniate():
             """)
             sb.sleep(4)
 
-            for pag in range(1, 20): # Aseguramos llegar hasta el final
+            for pag in range(1, 20):
                 print(f"📄 Escaneando página {pag}...")
                 
                 if pag > 1:
@@ -68,7 +84,6 @@ def extraccion_tarjetas_comuniate():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # ESTRATEGIA DE ANCLAJE: Buscamos primero las etiquetas de posición (PT, DF, MC, DL)
                 etiquetas_posicion = soup.find_all(['span', 'div', 'b', 'strong', 'p'])
                 tarjetas_procesadas = set()
                 jugadores_pagina = 0
@@ -77,7 +92,6 @@ def extraccion_tarjetas_comuniate():
                     texto_tag = tag.get_text(strip=True).upper()
                     
                     if texto_tag in mapa_posiciones:
-                        # Hemos encontrado el "Globito Verde". Ahora subimos para agarrar toda la tarjeta
                         padre = tag.parent
                         es_tarjeta = False
                         for _ in range(6): 
@@ -87,17 +101,15 @@ def extraccion_tarjetas_comuniate():
                             if padre:
                                 padre = padre.parent
                         
-                        # Si no tiene precio o ya leímos esta tarjeta, pasamos de largo
                         if not es_tarjeta or not padre or id(padre) in tarjetas_procesadas:
                             continue
                         
                         tarjetas_procesadas.add(id(padre))
                         pos = mapa_posiciones[texto_tag]
                         
-                        # Extraemos todo el texto suelto de la tarjeta
                         textos_sueltos = [t.strip() for t in padre.stripped_strings if t.strip()]
                         
-                        # 1. NOMBRE (Suele estar en un enlace <a> o ser el primer texto largo)
+                        # 1. NOMBRE
                         nombre = ""
                         a_tag = padre.find('a')
                         if a_tag and len(a_tag.get_text(strip=True)) > 2:
@@ -112,7 +124,7 @@ def extraccion_tarjetas_comuniate():
                         if not nombre:
                             continue
 
-                        # 2. PRECIO (Evitando los textos secundarios como "Ideal:" o "Máx.:")
+                        # 2. PRECIO
                         precio = "0 €"
                         for i, t in enumerate(textos_sueltos):
                             if '€' in t:
@@ -121,7 +133,7 @@ def extraccion_tarjetas_comuniate():
                                     precio = t.replace('€', '').strip() + " €"
                                     break
                         
-                        # 3. PUNTOS (El número suelto que acompaña a la posición en el globito azul)
+                        # 3. PUNTOS
                         pts = "0.0"
                         for t in textos_sueltos:
                             t_clean = t.replace('.', '').replace(',', '')
@@ -129,29 +141,37 @@ def extraccion_tarjetas_comuniate():
                                 pts = t
                                 break
                                 
-                        # 4. EQUIPO (Buscando el pequeño escudo en las imágenes)
+                        # 4. EQUIPO (Búsqueda Agresiva con Diccionario)
                         equipo = "LaLiga"
-                        for img in padre.find_all('img'):
-                            src = img.get('src', '').lower()
-                            alt = img.get('alt', '').strip().upper()
-                            
-                            if nombre.upper() in alt or "AVATAR" in src or "JUGADOR" in src:
-                                continue
-                                
-                            for eq in equipos_laliga:
-                                eq_norm = eq.lower().replace(" ", "-")
-                                eq_norm_no_accents = eq_norm.replace('é','e').replace('á','a').replace('í','i').replace('ó','o').replace('ú','u')
-                                
-                                if eq.lower() in src or eq_norm in src or eq_norm_no_accents in src or eq.upper() in alt:
-                                    equipo = eq
-                                    if equipo == "Madrid": equipo = "Real Madrid"
-                                    if equipo == "Sociedad": equipo = "Real Sociedad"
-                                    break
-                            
-                            if equipo != "LaLiga":
-                                break
+                        
+                        # Intento A: A través de los enlaces (href) que apuntan al equipo
+                        for a in padre.find_all('a', href=True):
+                            href = a['href'].lower()
+                            if '/equipo/' in href:
+                                slug = href.split('/equipo/')[-1].split('/')[0] # ej: "real-madrid"
+                                for clave, nombre_real in mapa_equipos.items():
+                                    if clave in slug:
+                                        equipo = nombre_real
+                                        break
+                            if equipo != "LaLiga": break
 
-                        # Guardamos en el diccionario
+                        # Intento B: Si no hay enlace, miramos el escudo (src, alt, title)
+                        if equipo == "LaLiga":
+                            for img in padre.find_all('img'):
+                                src = img.get('src', '').lower()
+                                alt = img.get('alt', '').strip().lower()
+                                title = img.get('title', '').strip().lower()
+                                
+                                if nombre.lower() in alt or "avatar" in src or "jugador" in src:
+                                    continue
+                                    
+                                for clave, nombre_real in mapa_equipos.items():
+                                    if clave in src or clave in alt or clave in title:
+                                        equipo = nombre_real
+                                        break
+                                
+                                if equipo != "LaLiga": break
+
                         if nombre not in jugadores_dict and precio != "0 €":
                             jugadores_dict[nombre] = {
                                 "nombre": nombre, "equipo": equipo, "pos": pos,
@@ -174,7 +194,7 @@ def extraccion_tarjetas_comuniate():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡MISIÓN COMPLETADA! {len(resultado)} jugadores extraídos leyendo las tarjetas visuales.")
+        print(f"✅ ¡MISIÓN COMPLETADA Y PULIDA! {len(resultado)} jugadores con equipos impecables.")
     else:
         print("❌ El escáner funcionó, pero no logró reconstruir las tarjetas.")
 
