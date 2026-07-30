@@ -13,7 +13,7 @@ def extraer_html_quirurgico():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 10800} # Pantalla super alta para renderizar todos los elementos
+            viewport={"width": 1920, "height": 10800}
         )
         page = context.new_page()
 
@@ -21,7 +21,7 @@ def extraer_html_quirurgico():
             page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="domcontentloaded")
             time.sleep(5)
 
-            # Forzar scroll progresivo para activar lazy-loading
+            # Scroll para asegurar renderizado
             for _ in range(10):
                 page.evaluate("window.scrollBy(0, 1500)")
                 time.sleep(0.3)
@@ -49,16 +49,13 @@ def extraer_html_quirurgico():
         if len(celdas) >= 3:
             textos = [c.get_text(strip=True) for c in celdas if c.get_text(strip=True)]
             if len(textos) >= 3:
-                # El primer texto suele ser el nombre del jugador
                 nombre = textos[0]
                 
-                # Limpiar números de ranking iniciales ("1 José Bordalás" -> "José Bordalás")
                 if nombre and nombre[0].isdigit():
                     partes = nombre.split()
                     if len(partes) > 1 and partes[0].isdigit():
                         nombre = " ".join(partes[1:])
 
-                # Ignorar encabezados de tabla
                 if nombre.upper() in ["JUGADOR", "NOMBRE", "POS", "EQUIPO", "VALOR"]:
                     continue
 
@@ -77,11 +74,10 @@ def extraer_html_quirurgico():
                         "pts": pts
                     }
 
-    # 2. Buscar en bloques de tarjetas o div alternativos si la web usa grids
-     tarjetas = soup.find_all('div', class_=re.compile(r'player|jugador|card|item', re.I))
+    # 2. Buscar bloques div o componentes de jugador con indentación corregida
+    tarjetas = soup.find_all('div', class_=re.compile(r'player|jugador|card|item', re.I))
     for t in tarjetas:
         txt = t.get_text(" ", strip=True)
-        # Buscar patrones que contengan euros
         if "€" in txt:
             partes = txt.split()
             if len(partes) >= 2:
