@@ -3,133 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chollos La Liga Fantasy - Analítica</title>
+    <title>LaLiga Fantasy Pro - Mi Liga</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- HEADER SUPERIOR CON MENÚ DESPLEGABLE -->
+    <!-- HEADER SUPERIOR LIMPIO -->
     <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
         <div class="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between">
             <div class="flex items-center gap-3 font-bold text-emerald-400 text-lg">
-                <span>AF</span> Analítica Fantasy
+                <span>⚽</span> LaLiga Fantasy Pro
             </div>
             
-            <nav class="hidden md:flex gap-6 text-xs font-semibold text-slate-300">
-                <a href="#" class="hover:text-emerald-400 transition">Portada</a>
-                <a href="#" class="hover:text-emerald-400 transition">La Liga</a>
+            <nav class="flex gap-4 text-sm font-semibold text-slate-300">
+                <!-- MENÚ DESPLEGABLE MI LIGA -->
                 <div class="relative group cursor-pointer">
-                    <span class="text-emerald-400 font-bold underline decoration-2 underline-offset-4">Fantasy ▾</span>
-                    <div class="absolute hidden group-hover:block bg-slate-900 border border-slate-800 rounded-xl p-2 w-48 shadow-2xl mt-1 space-y-1">
-                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Mercado Fantasy</a>
-                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Puja ideal</a>
-                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-emerald-400 font-bold">Chollos Fantasy</a>
-                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Predicción de puntos</a>
-                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Estadísticas Fantasy</a>
+                    <button class="bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-xl border border-emerald-500/30 flex items-center gap-2 hover:bg-emerald-500 hover:text-slate-950 transition">
+                        <span>🏆</span> Mi Liga ▾
+                    </button>
+                    <div class="absolute right-0 hidden group-hover:block bg-slate-900 border border-slate-800 rounded-xl p-2 w-52 shadow-2xl mt-1 space-y-1 z-50">
+                        <button onclick="cambiarVista('mercado')" class="w-full text-left px-3 py-2 hover:bg-slate-800 rounded-lg text-slate-200 hover:text-white flex items-center gap-2">
+                            🛒 Mi Mercado
+                        </button>
+                        <button onclick="cambiarVista('plantilla')" class="w-full text-left px-3 py-2 hover:bg-slate-800 rounded-lg text-slate-200 hover:text-white flex items-center gap-2">
+                            👕 Mi Plantilla
+                        </button>
                     </div>
                 </div>
-                <a href="#" class="hover:text-emerald-400 transition">Marca</a>
-                <a href="#" class="hover:text-emerald-400 transition">Mister</a>
-                <a href="#" class="hover:text-emerald-400 transition">Biwenger</a>
             </nav>
         </div>
     </header>
 
-    <!-- LAYOUT PRINCIPAL DE 3 COLUMNAS -->
+    <!-- LAYOUT PRINCIPAL -->
     <div class="flex-1 max-w-[1600px] w-full mx-auto flex gap-4 p-4">
         
-        <!-- SIDEBAR IZQUIERDO: EQUIPOS LALIGA -->
-        <aside class="w-16 bg-slate-900 border border-slate-800 rounded-2xl p-2 hidden lg:flex flex-col items-center gap-3">
-            <span class="text-[10px] font-bold text-slate-500 uppercase">Equipos</span>
-            <div class="space-y-2 overflow-y-auto max-h-[80vh] w-full text-center">
-                <button onclick="filtrarEquipo('todos')" class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-xl hover:bg-emerald-500 hover:text-slate-950 transition">ALL</button>
-                <div class="space-y-1 text-xs">
-                    <button onclick="filtrarEquipo('FC Barcelona')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-blue-400">BAR</button>
-                    <button onclick="filtrarEquipo('Real Madrid')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-amber-300">RMA</button>
-                    <button onclick="filtrarEquipo('Atlético de Madrid')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-red-400">ATM</button>
-                    <button onclick="filtrarEquipo('Villarreal CF')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-yellow-400">VIL</button>
-                    <button onclick="filtrarEquipo('Athletic Club')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-red-500">ATH</button>
-                    <button onclick="filtrarEquipo('Real Betis')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-emerald-400">BET</button>
-                    <button onclick="filtrarEquipo('Sevilla FC')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-slate-200">SEV</button>
-                </div>
+        <!-- SIDEBAR IZQUIERDO: LOS 20 EQUIPOS DE LALIGA -->
+        <aside class="w-20 bg-slate-900 border border-slate-800 rounded-2xl p-2 hidden sm:flex flex-col items-center gap-2">
+            <span class="text-[10px] font-bold text-slate-500 uppercase py-1">Equipos</span>
+            <div class="space-y-1.5 overflow-y-auto max-h-[82vh] w-full text-center pr-0.5">
+                <button onclick="filtrarEquipo('todos')" class="w-full py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold rounded-xl hover:bg-emerald-500 hover:text-slate-950 transition">TODOS</button>
+                
+                <!-- LOS 20 EQUIPOS COMPLETOS -->
+                <button onclick="filtrarEquipo('Athletic Club')" title="Athletic Club" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 text-[10px] font-bold rounded-lg border border-slate-800">ATH</button>
+                <button onclick="filtrarEquipo('Atlético de Madrid')" title="Atlético de Madrid" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-red-400 text-[10px] font-bold rounded-lg border border-slate-800">ATM</button>
+                <button onclick="filtrarEquipo('CA Osasuna')" title="CA Osasuna" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-red-500 text-[10px] font-bold rounded-lg border border-slate-800">OSA</button>
+                <button onclick="filtrarEquipo('CD Leganés')" title="CD Leganés" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-300 text-[10px] font-bold rounded-lg border border-slate-800">LEG</button>
+                <button onclick="filtrarEquipo('Celta de Vigo')" title="Celta de Vigo" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-sky-400 text-[10px] font-bold rounded-lg border border-slate-800">CEL</button>
+                <button onclick="filtrarEquipo('Deportivo Alavés')" title="Deportivo Alavés" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-400 text-[10px] font-bold rounded-lg border border-slate-800">ALA</button>
+                <button onclick="filtrarEquipo('FC Barcelona')" title="FC Barcelona" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-400 text-[10px] font-bold rounded-lg border border-slate-800">BAR</button>
+                <button onclick="filtrarEquipo('Getafe CF')" title="Getafe CF" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-500 text-[10px] font-bold rounded-lg border border-slate-800">GET</button>
+                <button onclick="filtrarEquipo('Girona FC')" title="Girona FC" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-red-400 text-[10px] font-bold rounded-lg border border-slate-800">GIR</button>
+                <button onclick="filtrarEquipo('Rayo Vallecano')" title="Rayo Vallecano" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-red-500 text-[10px] font-bold rounded-lg border border-slate-800">RAY</button>
+                <button onclick="filtrarEquipo('RCD Espanyol')" title="RCD Espanyol" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-400 text-[10px] font-bold rounded-lg border border-slate-800">ESP</button>
+                <button onclick="filtrarEquipo('RCD Mallorca')" title="RCD Mallorca" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-red-500 text-[10px] font-bold rounded-lg border border-slate-800">MALL</button>
+                <button onclick="filtrarEquipo('Real Betis')" title="Real Betis" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-emerald-400 text-[10px] font-bold rounded-lg border border-slate-800">BET</button>
+                <button onclick="filtrarEquipo('Real Madrid')" title="Real Madrid" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-amber-300 text-[10px] font-bold rounded-lg border border-slate-800">RMA</button>
+                <button onclick="filtrarEquipo('Real Sociedad')" title="Real Sociedad" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-blue-300 text-[10px] font-bold rounded-lg border border-slate-800">RSO</button>
+                <button onclick="filtrarEquipo('Real Valladolid')" title="Real Valladolid" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-purple-400 text-[10px] font-bold rounded-lg border border-slate-800">VLL</button>
+                <button onclick="filtrarEquipo('Sevilla FC')" title="Sevilla FC" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-200 text-[10px] font-bold rounded-lg border border-slate-800">SEV</button>
+                <button onclick="filtrarEquipo('UD Las Palmas')" title="UD Las Palmas" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-yellow-400 text-[10px] font-bold rounded-lg border border-slate-800">LPA</button>
+                <button onclick="filtrarEquipo('Valencia CF')" title="Valencia CF" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-orange-400 text-[10px] font-bold rounded-lg border border-slate-800">VAL</button>
+                <button onclick="filtrarEquipo('Villarreal CF')" title="Villarreal CF" class="w-full py-1.5 bg-slate-950 hover:bg-slate-800 text-yellow-300 text-[10px] font-bold rounded-lg border border-slate-800">VIL</button>
             </div>
         </aside>
 
         <!-- CONTENIDO CENTRAL PRINCIPAL -->
         <main class="flex-1 space-y-4">
-            <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+            
+            <!-- CONTROLES Y BUSCADOR -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
-                    <h1 class="text-xl font-bold text-white">Chollos La Liga Fantasy — Jornada J1</h1>
-                    <p class="text-xs text-slate-400">Jugadores recomendados con tendencia al alza</p>
+                    <h1 id="titulo-vista" class="text-lg font-bold text-white flex items-center gap-2">
+                        🛒 Mi Mercado — LaLiga Fantasy
+                    </h1>
+                    <p class="text-xs text-slate-400">Busca jugadores en tiempo real con su precio oficial y tendencias</p>
                 </div>
-                <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Buscar jugador..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+
+                <div class="w-full md:w-auto flex gap-2">
+                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Buscar jugador (Ej: Yamal)..." class="w-full md:w-72 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
             </div>
 
-            <!-- TABLA ESTILO ANALÍTICA FANTASY -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <!-- SECCIÓN VISTA: MERCADO -->
+            <div id="vista-mercado" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
                         <tr>
                             <th class="px-4 py-3">Jugador</th>
-                            <th class="px-4 py-3">Próx. Partido</th>
-                            <th class="px-4 py-3 text-right">Mercado</th>
-                            <th class="px-4 py-3 text-right">Subida</th>
-                            <th class="px-4 py-3 text-center">Media</th>
+                            <th class="px-4 py-3">Equipo</th>
+                            <th class="px-4 py-3 text-center">Posición</th>
+                            <th class="px-4 py-3 text-right">Valor Mercado</th>
+                            <th class="px-4 py-3 text-right">Subida / Bajada</th>
+                            <th class="px-4 py-3 text-center">Media Pts</th>
+                            <th class="px-4 py-3 text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-cuerpo" class="divide-y divide-slate-800/60 text-slate-300">
-                        <!-- Filas dinámicas -->
+                        <!-- Render de todos los jugadores -->
                     </tbody>
                 </table>
             </div>
+
+            <!-- SECCIÓN VISTA: MI PLANTILLA -->
+            <div id="vista-plantilla" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                <h2 class="text-base font-bold text-emerald-400">👕 Mi Plantilla Guardada</h2>
+                <p class="text-xs text-slate-400">Jugadores que has seleccionado para tu equipo de la liga:</p>
+                
+                <div id="contenedor-mi-plantilla" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                    <!-- Jugadores añadidos a tu plantilla -->
+                </div>
+            </div>
+
         </main>
-
-        <!-- SIDEBAR DERECHO: PRÓXIMOS PARTIDOS / JORNADA -->
-        <aside class="w-72 bg-slate-900 border border-slate-800 rounded-2xl p-4 hidden md:block space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs font-bold text-white">Próximo partido</span>
-                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold border border-emerald-500/20">Jornada 1</span>
-            </div>
-
-            <div id="contenedor-partidos" class="space-y-2">
-                <!-- Partidos renderizados con JS -->
-            </div>
-        </aside>
-
     </div>
 
     <script>
-        let datosGlobales = [];
+        let todosLosJugadores = [];
+        let miPlantilla = JSON.parse(localStorage.getItem('mi_plantilla_fantasy') || '[]');
         let equipoSeleccionado = 'todos';
+        let vistaActual = 'mercado';
 
         async function cargarDatos() {
             try {
                 const res = await fetch('./datos.json?v=' + new Date().getTime());
                 if (res.ok) {
                     const data = await res.json();
-                    datosGlobales = data.laliga.chollos || [];
-                    renderizarPartidos(data.laliga.partidos || []);
+                    todosLosJugadores = data.laliga.chollos || [];
                     aplicarFiltros();
+                    renderizarMiPlantilla();
                 }
             } catch (e) {
-                console.error("Error cargando datos:", e);
+                console.error("Error cargando los datos:", e);
             }
         }
 
-        function renderizarPartidos(partidos) {
-            const contenedor = document.getElementById('contenedor-partidos');
-            if (!contenedor) return;
+        function cambiarVista(vista) {
+            vistaActual = vista;
+            const titulo = document.getElementById('titulo-vista');
+            const vMercado = document.getElementById('vista-mercado');
+            const vPlantilla = document.getElementById('vista-plantilla');
 
-            contenedor.innerHTML = partidos.map(p => `
-                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs hover:border-slate-700 transition">
-                    <div class="flex items-center gap-2 font-bold text-white">
-                        <span>${p.local}</span>
-                        <span class="text-slate-600 text-[10px]">VS</span>
-                        <span>${p.visitante}</span>
-                    </div>
-                    <span class="text-[10px] text-slate-400 font-medium">${p.fecha}</span>
-                </div>
-            `).join('');
+            if (vista === 'mercado') {
+                titulo.innerHTML = '🛒 Mi Mercado — LaLiga Fantasy';
+                vMercado.classList.remove('hidden');
+                vPlantilla.classList.add('hidden');
+            } else {
+                titulo.innerHTML = '👕 Mi Plantilla Personalizada';
+                vMercado.classList.add('hidden');
+                vPlantilla.classList.remove('hidden');
+                renderizarMiPlantilla();
+            }
         }
 
         function filtrarEquipo(eq) {
@@ -140,7 +163,7 @@
         function aplicarFiltros() {
             const busqueda = document.getElementById('filtro-nombre')?.value.toLowerCase().trim() || '';
 
-            const resultados = datosGlobales.filter(j => {
+            const resultados = todosLosJugadores.filter(j => {
                 const coincideNombre = j.nombre.toLowerCase().includes(busqueda);
                 const coincideEquipo = equipoSeleccionado === 'todos' || j.equipo === equipoSeleccionado;
                 return coincideNombre && coincideEquipo;
@@ -150,33 +173,68 @@
             if (!cuerpo) return;
 
             if (resultados.length === 0) {
-                cuerpo.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">No se encontraron jugadores.</td></tr>`;
+                cuerpo.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500">No hay jugadores que coincidan con la búsqueda.</td></tr>`;
                 return;
             }
 
             cuerpo.innerHTML = resultados.map(j => {
                 const esSubida = j.subida.includes('+');
+                const estaEnPlantilla = miPlantilla.some(p => p.nombre === j.nombre);
+
                 return `
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3 font-bold text-white flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                            <div>
-                                <p class="text-sm">${j.nombre}</p>
-                                <p class="text-[10px] text-slate-500 font-normal">${j.equipo}</p>
-                            </div>
+                            <span>⚽</span> ${j.nombre}
                         </td>
-                        <td class="px-4 py-3">
-                            <div class="text-[11px] text-slate-300 font-medium">vs Rival J1</div>
-                            <div class="w-16 bg-slate-950 rounded-full h-1.5 mt-1 overflow-hidden border border-slate-800">
-                                <div class="bg-emerald-400 h-1.5 rounded-full" style="width: ${j.titularidad}"></div>
-                            </div>
+                        <td class="px-4 py-3 text-slate-400 font-medium">${j.equipo}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded-md font-bold">${j.pos || 'JUG'}</span>
                         </td>
                         <td class="px-4 py-3 text-right font-bold text-white">${j.precio}</td>
                         <td class="px-4 py-3 text-right font-bold ${esSubida ? 'text-emerald-400' : 'text-red-400'}">${j.subida}</td>
                         <td class="px-4 py-3 text-center font-bold text-amber-400">${j.pts}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="togglePlantilla('${j.nombre.replace(/'/g, "\\'")}')" class="px-2.5 py-1 text-[10px] font-bold rounded-lg border transition ${estaEnPlantilla ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950'}">
+                                ${estaEnPlantilla ? 'Quitar' : '+ Plantilla'}
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function togglePlantilla(nombreJugador) {
+            const existe = miPlantilla.some(p => p.nombre === nombreJugador);
+            if (existe) {
+                miPlantilla = miPlantilla.filter(p => p.nombre !== nombreJugador);
+            } else {
+                const jugadorObj = todosLosJugadores.find(j => j.nombre === nombreJugador);
+                if (jugadorObj) miPlantilla.push(jugadorObj);
+            }
+
+            localStorage.setItem('mi_plantilla_fantasy', JSON.stringify(miPlantilla));
+            aplicarFiltros();
+            if (vistaActual === 'plantilla') renderizarMiPlantilla();
+        }
+
+        function renderizarMiPlantilla() {
+            const contenedor = document.getElementById('contenedor-mi-plantilla');
+            if (!contenedor) return;
+
+            if (miPlantilla.length === 0) {
+                contenedor.innerHTML = `<p class="col-span-full text-slate-500 text-xs text-center py-6">Tu plantilla está vacía. Añade jugadores desde "Mi Mercado".</p>`;
+                return;
+            }
+
+            contenedor.innerHTML = miPlantilla.map(j => `
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-sm text-white">${j.nombre}</p>
+                        <p class="text-[10px] text-slate-400">${j.equipo} • <strong class="text-emerald-300">${j.precio}</strong></p>
+                    </div>
+                    <button onclick="togglePlantilla('${j.nombre.replace(/'/g, "\\'")}')" class="text-xs text-red-400 font-bold px-2 py-1 bg-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition">✕</button>
+                </div>
+            `).join('');
         }
 
         window.onload = cargarDatos;
