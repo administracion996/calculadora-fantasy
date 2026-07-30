@@ -17,10 +17,12 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
-      - name: Instalar librerías
-        run: pip install requests cloudscraper
+      - name: Instalar Playwright
+        run: |
+          pip install playwright
+          playwright install chromium
 
       - name: Ejecutar Robot
         run: python bot.py
@@ -30,5 +32,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add datos.json
-          git commit -m "Extraccion directa 100% de Analitica Fantasy" || echo "Sin cambios"
+          git commit -m "Extracción real mediante navegador Playwright" || echo "Sin cambios"
           git push

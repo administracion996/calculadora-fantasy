@@ -1,75 +1,62 @@
 import json
-import cloudscraper
+import time
+from playwright.sync_api import sync_playwright
 
-def extraer_analitica_api():
-    print("🤖 Conectando a la API de www.analiticafantasy.com...")
+def extraer_con_navegador():
+    print("🤖 Abriendo navegador real para cargar www.analiticafantasy.com...")
     
-    # URL de la API interna de Analítica Fantasy para la sección de Mercado de LaLiga Fantasy
-    url_api = "https://www.analiticafantasy.com/api/chollos?game=relevo"
-    url_api_secundaria = "https://www.analiticafantasy.com/api/market?game=relevo"
-    
-    # Engañar a Cloudflare simulando un navegador navegando en la web
-    scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True})
-    
-    jugadores_raw = []
-    
-    # Intentar endpoint principal de Analítica Fantasy
-    try:
-        response = scraper.get(url_api, timeout=25)
-        if response.status_code == 200:
-            res_data = response.json()
-            jugadores_raw = res_data if isinstance(res_data, list) else res_data.get("players", res_data.get("data", []))
-    except Exception as e:
-        print(f"Probando endpoint secundario por: {e}")
+    with sync_playwright() as p:
+        # Lanzar un navegador Chromium real
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        )
+        page = context.new_page()
 
-    # Si el primer endpoint no responde, probar el de mercado
-    if not jugadores_raw:
         try:
-            response = scraper.get(url_api_secundaria, timeout=25)
-            if response.status_code == 200:
-                res_data = response.json()
-                jugadores_raw = res_data if isinstance(res_data, list) else res_data.get("players", res_data.get("data", []))
+            # Ir directamente a la URL de Mercado LaLiga Fantasy
+            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="networkidle")
+            time.sleep(5)  # Esperar renderizado completo de la tabla
+
+            # Esperar a que la tabla o los elementos de jugador estén presentes
+            page.wait_for_selector("table, div[class*='player']", timeout=15000)
+
+            # Extraer filas de la tabla
+            filas = page.query_selector_all("tbody tr")
+            jugadores = []
+
+            for fila in filas:
+                texto_fila = fila.inner_text().split("\n")
+                columnas = fila.query_selector_all("td")
+
+                if len(columnas) >= 4:
+                    nombre = columnas[0].inner_text().strip()
+                    equipo_pos = columnas[1].inner_text().strip() if len(columnas) > 1 else "LaLiga"
+                    precio = columnas[2].inner_text().strip() if len(columnas) > 2 else "0 €"
+                    subida = columnas[3].inner_text().strip() if len(columnas) > 3 else "0 €"
+                    pts = columnas[4].inner_text().strip() if len(columnas) > 4 else "0.0"
+
+                    jugadores.append({
+                        "nombre": nombre,
+                        "equipo": equipo_pos,
+                        "pos": "JUG",
+                        "precio": precio,
+                        "subida": subida,
+                        "pts": pts
+                    })
+
+            if jugadores:
+                base_datos = {"laliga": {"chollos": jugadores}}
+                with open("datos.json", "w", encoding="utf-8") as f:
+                    json.dump(base_datos, f, ensure_ascii=False, indent=4)
+                print(f"✅ ¡ÉXITO EXTRAÍDO! {len(jugadores)} jugadores capturados en pantalla.")
+            else:
+                print("⚠️ La tabla no devolvió filas. Guardando estructura alternativa...")
+
         except Exception as e:
-            print(f"Error en endpoint secundario: {e}")
-
-    # Si la API privada no devuelve JSON directo, raspamos las peticiones internas
-    if not jugadores_raw:
-        print("❌ No se pudieron obtener los datos de la API de Analítica Fantasy.")
-        return
-
-    jugadores = []
-    for p in jugadores_raw:
-        nombre = p.get("nickname", p.get("name", "Jugador"))
-        equipo = p.get("teamName", p.get("team", {}).get("name", "LaLiga"))
-        pos = str(p.get("position", "MED"))
-        
-        pos_map = {"1": "POR", "2": "DEF", "3": "MED", "4": "DEL"}
-        pos = pos_map.get(pos, pos)
-        
-        precio = p.get("marketValue", p.get("price", 0))
-        incremento = p.get("marketValueIncrement", p.get("priceIncrement", 0))
-        puntos = str(p.get("pointsAverage", p.get("points", 0)))
-        
-        if incremento >= 0:
-            str_subida = f"+ {incremento:,} €".replace(',', '.')
-        else:
-            str_subida = f"- {abs(incremento):,} €".replace(',', '.')
-            
-        jugadores.append({
-            "nombre": nombre,
-            "equipo": equipo,
-            "pos": pos,
-            "precio": f"{precio:,} €".replace(',', '.'),
-            "subida": str_subida,
-            "pts": puntos
-        })
-        
-    base_datos = {"laliga": {"chollos": jugadores}}
-    
-    with open("datos.json", "w", encoding="utf-8") as f:
-        json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        
-    print(f"✅ ¡ÉXITO DE EXTRAÍDOS! Guardados {len(jugadores)} jugadores DIRECTAMENTE de analiticafantasy.com")
+            print(f"❌ Error durante la navegación: {e}")
+        finally:
+            browser.close()
 
 if __name__ == "__main__":
-    extraer_analitica_api()
+    extraer_con_navegador()
