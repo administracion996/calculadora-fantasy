@@ -3,208 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasyHub - Analítica y Estadísticas LaLiga</title>
+    <title>Chollos La Liga Fantasy - Analítica</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- Header principal -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3 font-extrabold text-xl text-emerald-400">
-                <span class="text-2xl">📊</span> Analítica FantasyHub
+    <!-- HEADER SUPERIOR CON MENÚ DESPLEGABLE -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3 font-bold text-emerald-400 text-lg">
+                <span>AF</span> Analítica Fantasy
             </div>
-            <div class="flex gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition">Biwenger</button>
-                <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">LaLiga Fantasy</button>
-                <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">Comunio</button>
-            </div>
+            
+            <nav class="hidden md:flex gap-6 text-xs font-semibold text-slate-300">
+                <a href="#" class="hover:text-emerald-400 transition">Portada</a>
+                <a href="#" class="hover:text-emerald-400 transition">La Liga</a>
+                <div class="relative group cursor-pointer">
+                    <span class="text-emerald-400 font-bold underline decoration-2 underline-offset-4">Fantasy ▾</span>
+                    <div class="absolute hidden group-hover:block bg-slate-900 border border-slate-800 rounded-xl p-2 w-48 shadow-2xl mt-1 space-y-1">
+                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Mercado Fantasy</a>
+                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Puja ideal</a>
+                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-emerald-400 font-bold">Chollos Fantasy</a>
+                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Predicción de puntos</a>
+                        <a href="#" class="block px-3 py-1.5 hover:bg-slate-800 rounded text-slate-300 hover:text-white">Estadísticas Fantasy</a>
+                    </div>
+                </div>
+                <a href="#" class="hover:text-emerald-400 transition">Marca</a>
+                <a href="#" class="hover:text-emerald-400 transition">Mister</a>
+                <a href="#" class="hover:text-emerald-400 transition">Biwenger</a>
+            </nav>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8 space-y-6">
+    <!-- LAYOUT PRINCIPAL DE 3 COLUMNAS -->
+    <div class="flex-1 max-w-[1600px] w-full mx-auto flex gap-4 p-4">
         
-        <!-- Panel de Filtros -->
-        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                    🔍 Mercado & Estadísticas de Jugadores
-                </h1>
-                <span id="contador-resultados" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                    Cargando base de datos...
-                </span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <!-- Buscador Nombre -->
-                <div>
-                    <label class="text-xs font-medium text-slate-400">Buscar por nombre</label>
-                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé, Pedri..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <!-- Filtro Equipo -->
-                <div>
-                    <label class="text-xs font-medium text-slate-400">Equipo</label>
-                    <select id="filtro-equipo" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="todos">Todos los equipos (20)</option>
-                        <option value="Athletic Club">Athletic Club</option>
-                        <option value="Atlético de Madrid">Atlético de Madrid</option>
-                        <option value="CA Osasuna">CA Osasuna</option>
-                        <option value="CD Leganés">CD Leganés</option>
-                        <option value="Celta de Vigo">Celta de Vigo</option>
-                        <option value="Deportivo Alavés">Deportivo Alavés</option>
-                        <option value="FC Barcelona">FC Barcelona</option>
-                        <option value="Getafe CF">Getafe CF</option>
-                        <option value="Girona FC">Girona FC</option>
-                        <option value="Rayo Vallecano">Rayo Vallecano</option>
-                        <option value="RCD Espanyol">RCD Espanyol</option>
-                        <option value="RCD Mallorca">RCD Mallorca</option>
-                        <option value="Real Betis">Real Betis</option>
-                        <option value="Real Madrid">Real Madrid</option>
-                        <option value="Real Sociedad">Real Sociedad</option>
-                        <option value="Real Valladolid">Real Valladolid</option>
-                        <option value="Sevilla FC">Sevilla FC</option>
-                        <option value="UD Las Palmas">UD Las Palmas</option>
-                        <option value="Valencia CF">Valencia CF</option>
-                        <option value="Villarreal CF">Villarreal CF</option>
-                    </select>
-                </div>
-
-                <!-- Filtro Posición -->
-                <div>
-                    <label class="text-xs font-medium text-slate-400">Posición</label>
-                    <select id="filtro-posicion" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="todas">Todas las posiciones</option>
-                        <option value="POR">Portero (POR)</option>
-                        <option value="DEF">Defensa (DEF)</option>
-                        <option value="MED">Centrocampista (MED)</option>
-                        <option value="DEL">Delantero (DEL)</option>
-                    </select>
-                </div>
-
-                <!-- Tendencia Mercado -->
-                <div>
-                    <label class="text-xs font-medium text-slate-400">Tendencia Mercado</label>
-                    <select id="filtro-tendencia" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="todos">Todas las tendencias</option>
-                        <option value="subida">🔥 En Subida de valor</option>
-                        <option value="bajada">📉 En Bajada de valor</option>
-                    </select>
+        <!-- SIDEBAR IZQUIERDO: EQUIPOS LALIGA -->
+        <aside class="w-16 bg-slate-900 border border-slate-800 rounded-2xl p-2 hidden lg:flex flex-col items-center gap-3">
+            <span class="text-[10px] font-bold text-slate-500 uppercase">Equipos</span>
+            <div class="space-y-2 overflow-y-auto max-h-[80vh] w-full text-center">
+                <button onclick="filtrarEquipo('todos')" class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-xl hover:bg-emerald-500 hover:text-slate-950 transition">ALL</button>
+                <div class="space-y-1 text-xs">
+                    <button onclick="filtrarEquipo('FC Barcelona')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-blue-400">BAR</button>
+                    <button onclick="filtrarEquipo('Real Madrid')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-amber-300">RMA</button>
+                    <button onclick="filtrarEquipo('Atlético de Madrid')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-red-400">ATM</button>
+                    <button onclick="filtrarEquipo('Villarreal CF')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-yellow-400">VIL</button>
+                    <button onclick="filtrarEquipo('Athletic Club')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-red-500">ATH</button>
+                    <button onclick="filtrarEquipo('Real Betis')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-emerald-400">BET</button>
+                    <button onclick="filtrarEquipo('Sevilla FC')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center font-bold text-slate-200">SEV</button>
                 </div>
             </div>
-        </section>
+        </aside>
 
-        <!-- Tabla Estilo Analítica Fantasy -->
-        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-950 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+        <!-- CONTENIDO CENTRAL PRINCIPAL -->
+        <main class="flex-1 space-y-4">
+            <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h1 class="text-xl font-bold text-white">Chollos La Liga Fantasy — Jornada J1</h1>
+                    <p class="text-xs text-slate-400">Jugadores recomendados con tendencia al alza</p>
+                </div>
+                <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Buscar jugador..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <!-- TABLA ESTILO ANALÍTICA FANTASY -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
                         <tr>
-                            <th class="px-4 py-3.5">Jugador</th>
-                            <th class="px-4 py-3.5">Equipo</th>
-                            <th class="px-4 py-3.5 text-center">Posición</th>
-                            <th class="px-4 py-3.5 text-right">Valor Mercado</th>
-                            <th class="px-4 py-3.5 text-right">Tendencia Hoy</th>
-                            <th class="px-4 py-3.5 text-center">Media Pts</th>
+                            <th class="px-4 py-3">Jugador</th>
+                            <th class="px-4 py-3">Próx. Partido</th>
+                            <th class="px-4 py-3 text-right">Mercado</th>
+                            <th class="px-4 py-3 text-right">Subida</th>
+                            <th class="px-4 py-3 text-center">Media</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-800/60">
-                        <!-- Filas renderizadas con JS -->
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- Filas dinámicas -->
                     </tbody>
                 </table>
             </div>
-        </section>
+        </main>
 
-    </main>
+        <!-- SIDEBAR DERECHO: PRÓXIMOS PARTIDOS / JORNADA -->
+        <aside class="w-72 bg-slate-900 border border-slate-800 rounded-2xl p-4 hidden md:block space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs font-bold text-white">Próximo partido</span>
+                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold border border-emerald-500/20">Jornada 1</span>
+            </div>
+
+            <div id="contenedor-partidos" class="space-y-2">
+                <!-- Partidos renderizados con JS -->
+            </div>
+        </aside>
+
+    </div>
 
     <script>
-        let datosGlobales = {};
-        let plataformaActual = 'biwenger';
+        let datosGlobales = [];
+        let equipoSeleccionado = 'todos';
 
-        async function cargarDatosEstadisticas() {
+        async function cargarDatos() {
             try {
                 const res = await fetch('./datos.json?v=' + new Date().getTime());
                 if (res.ok) {
-                    datosGlobales = await res.json();
-                    cambiarJuego('biwenger');
+                    const data = await res.json();
+                    datosGlobales = data.laliga.chollos || [];
+                    renderizarPartidos(data.laliga.partidos || []);
+                    aplicarFiltros();
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Error cargando datos:", e);
             }
         }
 
-        function cambiarJuego(juego) {
-            plataformaActual = juego;
+        function renderizarPartidos(partidos) {
+            const contenedor = document.getElementById('contenedor-partidos');
+            if (!contenedor) return;
 
-            ['biwenger', 'laliga', 'comunio'].forEach(j => {
-                const btn = document.getElementById(`btn-${j}`);
-                if (btn) {
-                    if (j === juego) {
-                        btn.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition";
-                    } else {
-                        btn.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-                    }
-                }
-            });
+            contenedor.innerHTML = partidos.map(p => `
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs hover:border-slate-700 transition">
+                    <div class="flex items-center gap-2 font-bold text-white">
+                        <span>${p.local}</span>
+                        <span class="text-slate-600 text-[10px]">VS</span>
+                        <span>${p.visitante}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-medium">${p.fecha}</span>
+                </div>
+            `).join('');
+        }
 
+        function filtrarEquipo(eq) {
+            equipoSeleccionado = eq;
             aplicarFiltros();
         }
 
         function aplicarFiltros() {
-            if (!datosGlobales[plataformaActual] || !datosGlobales[plataformaActual].chollos) return;
+            const busqueda = document.getElementById('filtro-nombre')?.value.toLowerCase().trim() || '';
 
-            const textoBusqueda = document.getElementById('filtro-nombre')?.value.toLowerCase().trim() || '';
-            const equipoSel = document.getElementById('filtro-equipo')?.value || 'todos';
-            const posicionSel = document.getElementById('filtro-posicion')?.value || 'todas';
-            const tendenciaSel = document.getElementById('filtro-tendencia')?.value || 'todos';
-
-            const lista = datosGlobales[plataformaActual].chollos;
-
-            const resultados = lista.filter(j => {
-                const coincideNombre = (j.nombre || '').toLowerCase().includes(textoBusqueda);
-                const coincideEquipo = equipoSel === 'todos' || j.equipo === equipoSel;
-                const coincidePos = posicionSel === 'todas' || j.pos === posicionSel;
-
-                let coincideTendencia = true;
-                if (tendenciaSel === 'subida') coincideTendencia = (j.subida || '').includes('+');
-                if (tendenciaSel === 'bajada') coincideTendencia = (j.subida || '').includes('-');
-
-                return coincideNombre && coincideEquipo && coincidePos && coincideTendencia;
+            const resultados = datosGlobales.filter(j => {
+                const coincideNombre = j.nombre.toLowerCase().includes(busqueda);
+                const coincideEquipo = equipoSeleccionado === 'todos' || j.equipo === equipoSeleccionado;
+                return coincideNombre && coincideEquipo;
             });
 
-            const contador = document.getElementById('contador-resultados');
-            if (contador) contador.innerText = `${resultados.length} Jugadores analizados en ${plataformaActual.toUpperCase()}`;
-
             const cuerpo = document.getElementById('tabla-cuerpo');
-            if (cuerpo) {
-                if (resultados.length === 0) {
-                    cuerpo.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500">No se encontraron jugadores con los filtros seleccionados.</td></tr>`;
-                    return;
-                }
+            if (!cuerpo) return;
 
-                cuerpo.innerHTML = resultados.map(j => {
-                    const esSubida = (j.subida || '').includes('+');
-                    return `
-                        <tr class="hover:bg-slate-800/40 transition">
-                            <td class="px-4 py-3 font-bold text-white flex items-center gap-2">
-                                <span>⚽</span> ${j.nombre}
-                            </td>
-                            <td class="px-4 py-3 text-slate-400">${j.equipo}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-0.5 rounded-md font-bold">${j.pos}</span>
-                            </td>
-                            <td class="px-4 py-3 text-right font-bold text-slate-200">${j.precio}</td>
-                            <td class="px-4 py-3 text-right font-bold ${esSubida ? 'text-emerald-400' : 'text-red-400'}">
-                                ${j.subida}
-                            </td>
-                            <td class="px-4 py-3 text-center font-bold text-amber-400">${j.pts}</td>
-                        </tr>
-                    `;
-                }).join('');
+            if (resultados.length === 0) {
+                cuerpo.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">No se encontraron jugadores.</td></tr>`;
+                return;
             }
+
+            cuerpo.innerHTML = resultados.map(j => {
+                const esSubida = j.subida.includes('+');
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="px-4 py-3 font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <div>
+                                <p class="text-sm">${j.nombre}</p>
+                                <p class="text-[10px] text-slate-500 font-normal">${j.equipo}</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-[11px] text-slate-300 font-medium">vs Rival J1</div>
+                            <div class="w-16 bg-slate-950 rounded-full h-1.5 mt-1 overflow-hidden border border-slate-800">
+                                <div class="bg-emerald-400 h-1.5 rounded-full" style="width: ${j.titularidad}"></div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-right font-bold text-white">${j.precio}</td>
+                        <td class="px-4 py-3 text-right font-bold ${esSubida ? 'text-emerald-400' : 'text-red-400'}">${j.subida}</td>
+                        <td class="px-4 py-3 text-center font-bold text-amber-400">${j.pts}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        window.onload = cargarDatosEstadisticas;
+        window.onload = cargarDatos;
     </script>
 </body>
 </html>
