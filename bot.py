@@ -1,106 +1,84 @@
 import json
-import re
-import time
-from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
+import urllib.request
 
-def extraer_html_quirurgico():
-    print("🤖 Obteniendo el HTML completo de Analítica Fantasy...")
+def obtener_datos_laliga_oficial():
+    print("🤖 Conectando a la API de mercado completa...")
     
-    html_contenido = ""
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 10800}
-        )
-        page = context.new_page()
-
-        try:
-            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="domcontentloaded")
-            time.sleep(5)
-
-            # Scroll para asegurar renderizado
-            for _ in range(10):
-                page.evaluate("window.scrollBy(0, 1500)")
-                time.sleep(0.3)
-
-            html_contenido = page.content()
-
-        except Exception as e:
-            print(f"❌ Error al cargar la página: {e}")
-        finally:
-            browser.close()
-
-    if not html_contenido:
-        print("❌ No se pudo capturar el HTML.")
-        return
-
-    print("🔍 Analizando el HTML con BeautifulSoup...")
-    soup = BeautifulSoup(html_contenido, 'html.parser')
+    # Endpoint oficial con la base de datos global de jugadores de LaLiga Fantasy
+    url = "https://api-fantasy.llf.laliga.com/api/v1/master-data"
     
-    jugadores_dict = {}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+    }
 
-    # 1. Buscar en TODAS las filas de tablas presentes en el HTML
-    filas = soup.find_all('tr')
-    for fila in filas:
-        celdas = fila.find_all(['td', 'th'])
-        if len(celdas) >= 3:
-            textos = [c.get_text(strip=True) for c in celdas if c.get_text(strip=True)]
-            if len(textos) >= 3:
-                nombre = textos[0]
+    req = urllib.request.Request(url, headers=headers)
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
                 
-                if nombre and nombre[0].isdigit():
-                    partes = nombre.split()
-                    if len(partes) > 1 and partes[0].isdigit():
-                        nombre = " ".join(partes[1:])
+                # Mapeo de IDs de equipos a sus nombres
+                equipos_map = {}
+                for team in data.get("teams", []):
+                    equipos_map[team.get("id")] = team.get("name", "LaLiga")
 
-                if nombre.upper() in ["JUGADOR", "NOMBRE", "POS", "EQUIPO", "VALOR"]:
-                    continue
+                # Mapeo de Posiciones
+                pos_map = {1: "POR", 2: "DEF", 3: "MED", 4: "DEL"}
 
-                equipo = textos[1] if len(textos) > 1 else "LaLiga"
-                precio = textos[2] if len(textos) > 2 else "0 €"
-                subida = textos[3] if len(textos) > 3 else "0 €"
-                pts = textos[4] if len(textos) > 4 else "0.0"
+                players_raw = data.get("players", [])
+                print(f"📦 Recibidos {len(players_raw)} jugadores de la API.")
 
-                if nombre and len(nombre) > 2:
-                    jugadores_dict[nombre] = {
+                jugadores_procesados = []
+
+                for p in players_raw:
+                    nombre = p.get("nickname") or p.get("name") or "Jugador"
+                    id_equipo = p.get("teamId")
+                    equipo = equipos_map.get(id_equipo, "LaLiga")
+                    
+                    id_pos = p.get("positionId", 3)
+                    pos = pos_map.get(id_pos, "MED")
+
+                    precio_val = p.get("marketValue", 0)
+                    subida_val = p.get("marketValueIncrement", 0)
+                    pts_val = str(p.get("pointsAverage", 0.0))
+
+                    # Formatear precio y subida
+                    str_precio = f"{precio_val:,} €".replace(',', '.')
+                    if subida_val >= 0:
+                        str_subida = f"+ {subida_val:,} €".replace(',', '.')
+                    else:
+                        str_subida = f"- {abs(subida_val):,} €".replace(',', '.')
+
+                    jugadores_procesados.append({
                         "nombre": nombre,
                         "equipo": equipo,
-                        "pos": "JUG",
-                        "precio": precio,
-                        "subida": subida,
-                        "pts": pts
-                    }
+                        "pos": pos,
+                        "precio": str_precio,
+                        "subida": str_subida,
+                        "pts": pts_val
+                    })
 
-    # 2. Buscar bloques div o componentes de jugador con indentación corregida
-    tarjetas = soup.find_all('div', class_=re.compile(r'player|jugador|card|item', re.I))
-    for t in tarjetas:
-        txt = t.get_text(" ", strip=True)
-        if "€" in txt:
-            partes = txt.split()
-            if len(partes) >= 2:
-                nom = partes[0]
-                if nom not in jugadores_dict and len(nom) > 2 and not nom.isdigit():
-                    jugadores_dict[nom] = {
-                        "nombre": nom,
-                        "equipo": "LaLiga",
-                        "pos": "JUG",
-                        "precio": "0 €",
-                        "subida": "0 €",
-                        "pts": "0.0"
-                    }
+                # Ordenar la lista por valor de mercado descendente
+                jugadores_procesados.sort(
+                    key=lambda x: int(x["precio"].replace(" €", "").replace(".", "")) if x["precio"] else 0, 
+                    reverse=True
+                )
 
-    resultado = list(jugadores_dict.values())
+                if jugadores_procesados:
+                    base_datos = {"laliga": {"chollos": jugadores_procesados}}
+                    with open("datos.json", "w", encoding="utf-8") as f:
+                        json.dump(base_datos, f, ensure_ascii=False, indent=4)
+                    print(f"✅ ¡ÉXITO TOTAL Y DEFINITIVO! Guardados {len(jugadores_procesados)} jugadores reales.")
+                else:
+                    print("⚠️ No se pudieron mapear los jugadores.")
 
-    if resultado:
-        base_datos = {"laliga": {"chollos": resultado}}
-        with open("datos.json", "w", encoding="utf-8") as f:
-            json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡ÉXITO DEFINITIVO! Guardados {len(resultado)} jugadores extraídos del HTML nativo.")
-    else:
-        print("❌ No se pudieron procesar elementos del HTML.")
+            else:
+                print(f"❌ La API devolvió status {response.status}")
+
+    except Exception as e:
+        print(f"❌ Error al consultar la API oficial: {e}")
 
 if __name__ == "__main__":
-    extraer_html_quirurgico()
+    obtener_datos_laliga_oficial()
