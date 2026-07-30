@@ -13,7 +13,6 @@ def extraccion_todoterreno_blindada():
             sb.sleep(4)
 
             print("🔄 Forzando el filtro 'LALIGA FANTASY' con escudos activados...")
-            # JavaScript blindado con try-catch para no explotar con elementos nulos
             sb.execute_script("""
                 try {
                     var selects = document.querySelectorAll('select');
@@ -29,7 +28,7 @@ def extraccion_todoterreno_blindada():
                             }
                         }
                     }
-                } catch(e) { console.log('Error silenciado al cambiar juego: ', e); }
+                } catch(e) { console.log('Error silenciado al cambiar juego'); }
             """)
             sb.sleep(5) 
 
@@ -49,7 +48,7 @@ def extraccion_todoterreno_blindada():
                             }
                         }
                     }
-                } catch(e) { console.log('Error silenciado al expandir tabla: ', e); }
+                } catch(e) { console.log('Error silenciado al expandir tabla'); }
             """)
             sb.sleep(5) 
 
@@ -81,7 +80,8 @@ def extraccion_todoterreno_blindada():
                 equipo = "LaLiga"
 
                 for t in textos_limpios:
-                    if '€' in t:
+                    # Filtramos para no coger el filtro de rangos de precio de la web
+                    if '€' in t and "RANGO" not in t.upper() and "PRECIO" not in t.upper():
                         precio = t.strip()
                         break
 
@@ -112,7 +112,7 @@ def extraccion_todoterreno_blindada():
                         equipo = alt.title()
                         break
 
-                if len(nombre) > 2 and nombre not in jugadores_dict:
+                if len(nombre) > 2 and nombre not in jugadores_dict and precio != "0 €":
                     jugadores_dict[nombre] = {
                         "nombre": nombre, "equipo": equipo, "pos": pos,
                         "precio": precio, "subida": "0 €", "pts": pts
@@ -121,16 +121,23 @@ def extraccion_todoterreno_blindada():
         except Exception as e:
             print(f"❌ Error en la ejecución principal: {e}")
 
+    # --- NUEVA FUNCIÓN DE ORDENADO SEGURO ---
+    def obtener_valor_numerico(precio_str):
+        # Filtra el string y se queda SOLO con los números. Evita que Python explote.
+        digitos = ''.join(filter(str.isdigit, precio_str))
+        return int(digitos) if digitos else 0
+
     resultado = list(jugadores_dict.values())
     if resultado:
-        resultado.sort(key=lambda x: int(x["precio"].replace(" €", "").replace(".", "")) if "€" in x["precio"] else 0, reverse=True)
+        # Usamos la función blindada para ordenar
+        resultado.sort(key=lambda x: obtener_valor_numerico(x["precio"]), reverse=True)
         
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡ÉXITO! El radar sobrevivió y capturó a {len(resultado)} jugadores.")
+        print(f"✅ ¡ÉXITO! El radar capturó y ordenó limpiamente a {len(resultado)} jugadores.")
     else:
-        print("❌ El radar escaneó la página, pero no encontró precios (€).")
+        print("❌ El radar escaneó la página, pero no encontró precios válidos.")
 
 if __name__ == "__main__":
     extraccion_todoterreno_blindada()
