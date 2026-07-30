@@ -51,8 +51,9 @@ def extraccion_francotirador_fotos():
                 print(f"📄 Escaneando página {pag}...")
                 
                 if pag > 1:
-                    exito_clic = sb.execute_script(f"""
-                        var target = '{pag}';
+                    # FIX: Eliminamos el f-string y concatenamos la variable pag para evitar errores con las { } de JS
+                    exito_clic = sb.execute_script("""
+                        var target = '""" + str(pag) + """';
                         var btns = document.querySelectorAll('.paginate_button, .pagination a, ul.pagination li a, .page-link, span.paginate_button');
                         for (var i = 0; i < btns.length; i++) {
                             if (btns[i].innerText.trim() === target) {
@@ -79,7 +80,7 @@ def extraccion_francotirador_fotos():
 
                     celdas = fila.find_all(['td', 'th'])
                     
-                    # 1. NOMBRE, PRECIO Y PUNTOS (Igual que antes, rastreando toda la fila)
+                    # 1. NOMBRE, PRECIO Y PUNTOS
                     nombre = ""
                     precio = "0 €"
                     pts = "0.0"
@@ -108,7 +109,6 @@ def extraccion_francotirador_fotos():
                     
                     for celda in celdas:
                         imgs = celda.find_all('img')
-                        # Si esta celda no tiene imágenes, la ignoramos. Solo queremos la del bloque visual.
                         if not imgs:
                             continue
                             
@@ -132,15 +132,13 @@ def extraccion_francotirador_fotos():
                             for eq in equipos_laliga:
                                 if eq.lower() in src or eq.upper() in alt:
                                     equipo = eq
-                                    # Correcciones de nombres
                                     if equipo == "Madrid": equipo = "Real Madrid"
                                     if equipo == "Sociedad": equipo = "Real Sociedad"
                                     break
                                     
                             if equipo != "LaLiga":
-                                break # Encontramos el equipo, paramos de buscar imágenes
+                                break 
                         
-                        # Si ya hemos analizado la celda con la foto, no miramos más celdas
                         break
 
                     # Guardar
