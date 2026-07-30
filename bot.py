@@ -2,141 +2,134 @@ import json
 import time
 from playwright.sync_api import sync_playwright
 
-def extraer_directorio_completo():
-    print("🤖 Cambiando de objetivo: Entrando al DIRECTORIO COMPLETO de jugadores...")
+def extraccion_todoterreno():
+    print("🤖 Activando Protocolo TODOTERRENO (Cero Selectores Estrictos)...")
     jugadores_dict = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 1080}
-        )
-        page = context.new_page()
+        # Ventana maximizada para renderizar todos los elementos del grid
+        page = browser.new_page(viewport={"width": 1920, "height": 1080})
 
         try:
-            # 🎯 EL CAMBIO CLAVE: Vamos a la sección de /jugadores, NO a /mercado
             page.goto("https://www.analiticafantasy.com/fantasy-la-liga/jugadores", wait_until="networkidle", timeout=60000)
             time.sleep(5)
 
-            # 1. Cerrar banners de cookies
+            # 1. Quitar cookies molestando
             try:
-                page.evaluate("""() => {
-                    document.querySelectorAll('button').forEach(b => {
-                        if (b.innerText.match(/aceptar|agree|entendido/i)) b.click();
-                    });
-                }""")
-                time.sleep(1)
-            except:
-                pass
+                page.evaluate("document.querySelectorAll('button').forEach(b => { if(/aceptar|agree/i.test(b.innerText)) b.click(); })")
+            except: pass
 
-            # 2. Forzar el desplegable a mostrar 100 filas (si existe)
-            try:
-                page.evaluate("""() => {
-                    const selects = document.querySelectorAll('select');
-                    selects.forEach(s => {
-                        if (s.options.length > 0) {
-                            s.selectedIndex = s.options.length - 1;
-                            s.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    });
-                }""")
-                time.sleep(2)
-            except:
-                pass
-
-            # Bucle de paginación
-            for pag in range(1, 60):
-                print(f"📄 Leyendo página {pag} del directorio de Jugadores...")
+            for pag in range(1, 80):
+                print(f"📄 Escaneando página {pag} a ciegas...")
                 
-                page.wait_for_selector("tbody tr", timeout=10000)
-                filas = page.query_selector_all("tbody tr")
-                
-                primer_jugador_actual = ""
-                
-                for i, fila in enumerate(filas):
-                    celdas = fila.query_selector_all("td")
-                    if len(celdas) >= 3:
-                        textos = fila.inner_text().strip().split('\n')
-                        nombre = textos[0].strip() if textos else ""
-                        
-                        if nombre and nombre[0].isdigit():
-                            partes = nombre.split()
-                            if len(partes) > 1 and partes[0].isdigit():
-                                nombre = " ".join(partes[1:])
-                                
-                        if i == 0:
-                            primer_jugador_actual = nombre
+                # NO usamos wait_for_selector. Simplemente esperamos 3 segundos a que la red y JS asienten el HTML.
+                time.sleep(3) 
 
-                        # Buscar precio, puntos y equipo por toda la fila
-                        precio = "0 €"
-                        pts = "0.0"
-                        eq = "LaLiga"
-                        
-                        for txt in textos:
-                            txt = txt.strip()
-                            if "€" in txt:
-                                precio = txt
-                            elif len(txt) == 3 and txt.isupper():
-                                eq = txt
-
-                        if nombre:
-                            jugadores_dict[nombre] = {
-                                "nombre": nombre, "equipo": eq, "pos": "JUG",
-                                "precio": precio, "subida": "0 €", "pts": pts
+                # 2. Rescatamos el texto de la web buscando patrones universales (enlaces a perfiles o el símbolo €)
+                datos_js = page.evaluate("""() => {
+                    let resultados = [];
+                    // Plan A: Buscar cualquier enlace que lleve a un jugador
+                    let enlaces = document.querySelectorAll("a[href*='jugador']");
+                    
+                    if (enlaces.length > 0) {
+                        enlaces.forEach(a => {
+                            let cont = a;
+                            // Subimos 4 niveles en el HTML para atrapar la tarjeta completa con precio, equipo, etc.
+                            for(let i=0; i<4; i++) { if(cont.parentElement) cont = cont.parentElement; }
+                            resultados.push(cont.innerText);
+                        });
+                    } else {
+                        // Plan B: Buscar cualquier bloque de texto que contenga un euro
+                        let todos = document.querySelectorAll("div, li");
+                        todos.forEach(el => {
+                            if (el.innerText && el.innerText.includes('€') && el.children.length === 0) {
+                                let cont = el;
+                                for(let i=0; i<4; i++) { if(cont.parentElement) cont = cont.parentElement; }
+                                resultados.push(cont.innerText);
                             }
+                        });
+                    }
+                    return Array.from(new Set(resultados)); // Limpiar textos duplicados
+                }""")
 
-                print(f"✅ Acumulados: {len(jugadores_dict)} jugadores.")
+                nuevos = 0
+                for texto in datos_js:
+                    if not texto: continue
+                    # Partimos el bloque de texto en líneas limpias
+                    lineas = [l.strip() for l in texto.split('\n') if l.strip()]
+                    
+                    nombre = ""
+                    precio = "0 €"
+                    pos = "JUG"
+                    eq = "LaLiga"
+                    pts = "0.0"
 
-                # 3. Hacer clic en "Siguiente"
-                accion = page.evaluate("""() => {
-                    const botones = Array.from(document.querySelectorAll('button, a, div[role="button"], li'));
-                    const btnSiguiente = botones.find(b => {
-                        const txt = (b.innerText || '').trim().toLowerCase();
-                        const aria = (b.getAttribute('aria-label') || '').toLowerCase();
-                        return txt === '>' || txt === '»' || txt.includes('próx') || txt.includes('siguiente') || aria.includes('next');
+                    # 3. Heurística de Extracción (reconoce qué es cada cosa por su forma)
+                    for l in lineas:
+                        if '€' in l:
+                            precio = l
+                        elif l in ['POR', 'DEF', 'MED', 'DEL']:
+                            pos = l
+                        elif len(l) == 3 and l.isupper() and l not in ['POR', 'DEF', 'MED', 'DEL']:
+                            eq = l
+                        elif l.replace('.', '').replace(',', '').isdigit() and len(l) < 4:
+                            pts = l
+                        elif len(l) > 2 and not l.isdigit() and '€' not in l and not nombre:
+                            # Evitar que el nombre se guarde como "1. Vinícius" (quitamos el ranking)
+                            if len(l.split()) > 1 and l.split()[0].replace('.', '').isdigit():
+                                nombre = " ".join(l.split()[1:])
+                            else:
+                                nombre = l
+
+                    if nombre and nombre not in jugadores_dict:
+                        jugadores_dict[nombre] = {
+                            "nombre": nombre, "equipo": eq, "pos": pos,
+                            "precio": precio, "subida": "0 €", "pts": pts
+                        }
+                        nuevos += 1
+
+                print(f"✅ Jugadores acumulados: {len(jugadores_dict)} (Nuevos: {nuevos})")
+
+                # Si escaneamos una página y no hay nadie nuevo, hemos terminado
+                if nuevos == 0 and pag > 2:
+                    print("🏁 No hay jugadores nuevos. Fin del escaneo.")
+                    break
+
+                # 4. Botón siguiente universal (busca >, », Siguiente, Next o Cargar más)
+                avanzar = page.evaluate("""() => {
+                    let botones = Array.from(document.querySelectorAll('button, a, div[role="button"]'));
+                    let next = botones.find(b => {
+                        let t = (b.innerText || '').trim().toLowerCase();
+                        let a = (b.getAttribute('aria-label') || '').toLowerCase();
+                        return t === '>' || t === '»' || t.includes('siguiente') || t.includes('cargar') || a.includes('next');
                     });
                     
-                    if (btnSiguiente && !btnSiguiente.hasAttribute('disabled') && !btnSiguiente.className.includes('disabled')) {
-                        btnSiguiente.scrollIntoView();
-                        btnSiguiente.click();
-                        return 'clic';
+                    if (next && !next.disabled && !next.className.includes('disabled')) {
+                        next.scrollIntoView();
+                        next.click();
+                        return true;
                     }
-                    return 'nada';
+                    return false;
                 }""")
 
-                if accion == 'nada':
-                    print("🏁 Fin de la tabla (no hay más páginas).")
+                if not avanzar:
+                    print("🏁 Botón de avance no encontrado. Tabla finalizada.")
                     break
-
-                # 4. Esperar a que la tabla cambie
-                try:
-                    if primer_jugador_actual:
-                        nombre_js = primer_jugador_actual.replace("'", "\\'").replace('"', '\\"')
-                        page.wait_for_function(f"""() => {{
-                            const celda = document.querySelector('tbody tr td');
-                            if (!celda) return false;
-                            return !celda.innerText.includes('{nombre_js}');
-                        }}""", timeout=8000)
-                    time.sleep(0.5) 
-                except Exception:
-                    print("⚠️ La tabla no avanzó más. Rompiendo bucle de forma segura.")
-                    break
-
-            resultado = list(jugadores_dict.values())
-            
-            if resultado:
-                base_datos = {"laliga": {"chollos": resultado}}
-                with open("datos.json", "w", encoding="utf-8") as f:
-                    json.dump(base_datos, f, ensure_ascii=False, indent=4)
-                print(f"✅ ¡MISIÓN CUMPLIDA! Extraídos {len(resultado)} jugadores en total.")
-            else:
-                print("❌ No se guardó ningún jugador.")
 
         except Exception as e:
-            print(f"❌ Error crítico: {e}")
+            print(f"❌ Error en ejecución: {e}")
         finally:
             browser.close()
 
+        # Guardado final
+        resultado = list(jugadores_dict.values())
+        if resultado:
+            with open("datos.json", "w", encoding="utf-8") as f:
+                json.dump({"laliga": {"chollos": resultado}}, f, ensure_ascii=False, indent=4)
+            print(f"✅ ¡MISIÓN CUMPLIDA! Extraídos {len(resultado)} jugadores con éxito.")
+        else:
+            print("❌ No se capturaron datos.")
+
 if __name__ == "__main__":
-    extraer_directorio_completo()
+    extraccion_todoterreno()
