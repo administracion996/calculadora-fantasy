@@ -2,8 +2,8 @@ import json
 import time
 from playwright.sync_api import sync_playwright
 
-def extraccion_modo_humano():
-    print("🤖 Iniciando modo 'Simulador Humano' anti-bloqueos...")
+def extraer_directorio_completo():
+    print("🤖 Cambiando de objetivo: Entrando al DIRECTORIO COMPLETO de jugadores...")
     jugadores_dict = {}
 
     with sync_playwright() as p:
@@ -15,10 +15,11 @@ def extraccion_modo_humano():
         page = context.new_page()
 
         try:
-            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", wait_until="networkidle", timeout=60000)
-            time.sleep(4)
+            # 🎯 EL CAMBIO CLAVE: Vamos a la sección de /jugadores, NO a /mercado
+            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/jugadores", wait_until="networkidle", timeout=60000)
+            time.sleep(5)
 
-            # 1. Cerrar banners de cookies para que no tapen los botones
+            # 1. Cerrar banners de cookies
             try:
                 page.evaluate("""() => {
                     document.querySelectorAll('button').forEach(b => {
@@ -29,7 +30,7 @@ def extraccion_modo_humano():
             except:
                 pass
 
-            # 2. Forzar el desplegable a mostrar el máximo de filas (si existe)
+            # 2. Forzar el desplegable a mostrar 100 filas (si existe)
             try:
                 page.evaluate("""() => {
                     const selects = document.querySelectorAll('select');
@@ -44,11 +45,10 @@ def extraccion_modo_humano():
             except:
                 pass
 
-            # Bucle de paginación (máximo 60 páginas por seguridad)
+            # Bucle de paginación
             for pag in range(1, 60):
-                print(f"📄 Leyendo página {pag}...")
+                print(f"📄 Leyendo página {pag} del directorio de Jugadores...")
                 
-                # Esperar a que la tabla exista
                 page.wait_for_selector("tbody tr", timeout=10000)
                 filas = page.query_selector_all("tbody tr")
                 
@@ -56,9 +56,10 @@ def extraccion_modo_humano():
                 
                 for i, fila in enumerate(filas):
                     celdas = fila.query_selector_all("td")
-                    if len(celdas) >= 4:
-                        nombre = celdas[0].inner_text().strip().split('\n')[0]
-                        # Limpiar números de ranking
+                    if len(celdas) >= 3:
+                        textos = fila.inner_text().strip().split('\n')
+                        nombre = textos[0].strip() if textos else ""
+                        
                         if nombre and nombre[0].isdigit():
                             partes = nombre.split()
                             if len(partes) > 1 and partes[0].isdigit():
@@ -67,20 +68,27 @@ def extraccion_modo_humano():
                         if i == 0:
                             primer_jugador_actual = nombre
 
-                        eq = celdas[1].inner_text().strip().split('\n')[0] if len(celdas) > 1 else "LaLiga"
-                        val = celdas[2].inner_text().strip().split('\n')[0] if len(celdas) > 2 else "0 €"
-                        sub = celdas[3].inner_text().strip().split('\n')[0] if len(celdas) > 3 else "0 €"
-                        pt = celdas[4].inner_text().strip().split('\n')[0] if len(celdas) > 4 else "0.0"
+                        # Buscar precio, puntos y equipo por toda la fila
+                        precio = "0 €"
+                        pts = "0.0"
+                        eq = "LaLiga"
+                        
+                        for txt in textos:
+                            txt = txt.strip()
+                            if "€" in txt:
+                                precio = txt
+                            elif len(txt) == 3 and txt.isupper():
+                                eq = txt
 
                         if nombre:
                             jugadores_dict[nombre] = {
                                 "nombre": nombre, "equipo": eq, "pos": "JUG",
-                                "precio": val, "subida": sub, "pts": pt
+                                "precio": precio, "subida": "0 €", "pts": pts
                             }
 
                 print(f"✅ Acumulados: {len(jugadores_dict)} jugadores.")
 
-                # 3. Hacer clic en "Siguiente" buscando flechas o texto
+                # 3. Hacer clic en "Siguiente"
                 accion = page.evaluate("""() => {
                     const botones = Array.from(document.querySelectorAll('button, a, div[role="button"], li'));
                     const btnSiguiente = botones.find(b => {
@@ -90,6 +98,7 @@ def extraccion_modo_humano():
                     });
                     
                     if (btnSiguiente && !btnSiguiente.hasAttribute('disabled') && !btnSiguiente.className.includes('disabled')) {
+                        btnSiguiente.scrollIntoView();
                         btnSiguiente.click();
                         return 'clic';
                     }
@@ -97,24 +106,21 @@ def extraccion_modo_humano():
                 }""")
 
                 if accion == 'nada':
-                    print("🏁 Fin de la tabla (botón de página siguiente no encontrado o deshabilitado).")
+                    print("🏁 Fin de la tabla (no hay más páginas).")
                     break
 
-                # 4. LA CLAVE DEL ÉXITO: Esperar a que la tabla cambie de verdad
+                # 4. Esperar a que la tabla cambie
                 try:
                     if primer_jugador_actual:
-                        # Convertimos el nombre para que no rompa el código JS
                         nombre_js = primer_jugador_actual.replace("'", "\\'").replace('"', '\\"')
-                        
-                        # Python se congela aquí hasta que el primer nombre de la tabla ya NO sea el mismo
                         page.wait_for_function(f"""() => {{
                             const celda = document.querySelector('tbody tr td');
                             if (!celda) return false;
                             return !celda.innerText.includes('{nombre_js}');
                         }}""", timeout=8000)
-                    time.sleep(0.5) # Dejar que termine de pintar
+                    time.sleep(0.5) 
                 except Exception:
-                    print("⚠️ La tabla no se actualizó tras pulsar Siguiente. Rompiendo bucle para evitar duplicados.")
+                    print("⚠️ La tabla no avanzó más. Rompiendo bucle de forma segura.")
                     break
 
             resultado = list(jugadores_dict.values())
@@ -133,4 +139,4 @@ def extraccion_modo_humano():
             browser.close()
 
 if __name__ == "__main__":
-    extraccion_modo_humano()
+    extraer_directorio_completo()
