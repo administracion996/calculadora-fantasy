@@ -3,41 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasyHub Pro - Mercado Completo</title>
+    <title>FantasyHub - Analítica y Estadísticas LaLiga</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 font-bold text-xl text-emerald-400">
-                <span>⚽</span> FantasyHub Pro
+    <!-- Header principal -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 font-extrabold text-xl text-emerald-400">
+                <span class="text-2xl">📊</span> Analítica FantasyHub
             </div>
-            <nav class="flex gap-3">
-                <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-emerald-500 text-slate-900">Biwenger</button>
-                <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">LaLiga Fantasy</button>
-                <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="px-4 py-1.5 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">Comunio</button>
-            </nav>
+            <div class="flex gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button id="btn-biwenger" onclick="cambiarJuego('biwenger')" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition">Biwenger</button>
+                <button id="btn-laliga" onclick="cambiarJuego('laliga')" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">LaLiga Fantasy</button>
+                <button id="btn-comunio" onclick="cambiarJuego('comunio')" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">Comunio</button>
+            </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-8">
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8 space-y-6">
         
-        <!-- PANEL DE BÚSQUEDA Y FILTROS -->
-        <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">🔍 Buscador y Filtros de Mercado</h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Buscador -->
+        <!-- Panel de Filtros -->
+        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                    🔍 Mercado & Estadísticas de Jugadores
+                </h1>
+                <span id="contador-resultados" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    Cargando base de datos...
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Buscador Nombre -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Buscar Jugador</label>
-                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé, Pedri..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <label class="text-xs font-medium text-slate-400">Buscar por nombre</label>
+                    <input type="text" id="filtro-nombre" oninput="aplicarFiltros()" placeholder="Ej: Yamal, Mbappé, Pedri..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                 </div>
 
-                <!-- Equipos -->
+                <!-- Filtro Equipo -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Equipo (20 Clubes)</label>
-                    <select id="filtro-equipo" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <label class="text-xs font-medium text-slate-400">Equipo</label>
+                    <select id="filtro-equipo" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                         <option value="todos">Todos los equipos (20)</option>
                         <option value="Athletic Club">Athletic Club</option>
                         <option value="Atlético de Madrid">Atlético de Madrid</option>
@@ -62,10 +70,10 @@
                     </select>
                 </div>
 
-                <!-- Posición -->
+                <!-- Filtro Posición -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Posición</label>
-                    <select id="filtro-posicion" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <label class="text-xs font-medium text-slate-400">Posición</label>
+                    <select id="filtro-posicion" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                         <option value="todas">Todas las posiciones</option>
                         <option value="POR">Portero (POR)</option>
                         <option value="DEF">Defensa (DEF)</option>
@@ -74,27 +82,36 @@
                     </select>
                 </div>
 
-                <!-- Tendencia -->
+                <!-- Tendencia Mercado -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-400">Tendencia Mercado</label>
-                    <select id="filtro-tendencia" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <label class="text-xs font-medium text-slate-400">Tendencia Mercado</label>
+                    <select id="filtro-tendencia" onchange="aplicarFiltros()" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
                         <option value="todos">Todas las tendencias</option>
-                        <option value="subida">🔥 Solo Chollos en Subida</option>
-                        <option value="bajada">📉 En Bajada de Precio</option>
+                        <option value="subida">🔥 En Subida de valor</option>
+                        <option value="bajada">📉 En Bajada de valor</option>
                     </select>
                 </div>
             </div>
         </section>
 
-        <!-- RESULTADOS EN VIVO -->
-        <section class="space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">📋 Mercado de Jugadores</h2>
-                <span id="contador-resultados" class="text-sm text-emerald-400 font-semibold">Cargando datos.json...</span>
-            </div>
-            
-            <div id="contenedor-jugadores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Tarjetas renderizadas -->
+        <!-- Tabla Estilo Analítica Fantasy -->
+        <section class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-950 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                            <th class="px-4 py-3.5">Jugador</th>
+                            <th class="px-4 py-3.5">Equipo</th>
+                            <th class="px-4 py-3.5 text-center">Posición</th>
+                            <th class="px-4 py-3.5 text-right">Valor Mercado</th>
+                            <th class="px-4 py-3.5 text-right">Tendencia Hoy</th>
+                            <th class="px-4 py-3.5 text-center">Media Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-800/60">
+                        <!-- Filas renderizadas con JS -->
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -104,20 +121,15 @@
         let datosGlobales = {};
         let plataformaActual = 'biwenger';
 
-        // Cargar los datos scrapeados del archivo datos.json con timestamp para saltarse la caché
-        async function cargarDatosReales() {
+        async function cargarDatosEstadisticas() {
             try {
-                const urlJSON = './datos.json?v=' + new Date().getTime();
-                const respuesta = await fetch(urlJSON);
-                if (respuesta.ok) {
-                    datosGlobales = await respuesta.json();
+                const res = await fetch('./datos.json?v=' + new Date().getTime());
+                if (res.ok) {
+                    datosGlobales = await res.json();
                     cambiarJuego('biwenger');
-                } else {
-                    document.getElementById('contador-resultados').innerText = "No se encontró el archivo datos.json";
                 }
             } catch (e) {
                 console.error(e);
-                document.getElementById('contador-resultados').innerText = "Error cargando los datos reales.";
             }
         }
 
@@ -128,9 +140,9 @@
                 const btn = document.getElementById(`btn-${j}`);
                 if (btn) {
                     if (j === juego) {
-                        btn.className = "px-4 py-1.5 rounded-lg text-sm font-bold bg-emerald-500 text-slate-900";
+                        btn.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition";
                     } else {
-                        btn.className = "px-4 py-1.5 rounded-lg text-sm font-bold bg-slate-800 text-slate-300";
+                        btn.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
                     }
                 }
             });
@@ -146,13 +158,13 @@
             const posicionSel = document.getElementById('filtro-posicion')?.value || 'todas';
             const tendenciaSel = document.getElementById('filtro-tendencia')?.value || 'todos';
 
-            const listaJugadores = datosGlobales[plataformaActual].chollos;
+            const lista = datosGlobales[plataformaActual].chollos;
 
-            const resultados = listaJugadores.filter(j => {
+            const resultados = lista.filter(j => {
                 const coincideNombre = (j.nombre || '').toLowerCase().includes(textoBusqueda);
                 const coincideEquipo = equipoSel === 'todos' || j.equipo === equipoSel;
                 const coincidePos = posicionSel === 'todas' || j.pos === posicionSel;
-                
+
                 let coincideTendencia = true;
                 if (tendenciaSel === 'subida') coincideTendencia = (j.subida || '').includes('+');
                 if (tendenciaSel === 'bajada') coincideTendencia = (j.subida || '').includes('-');
@@ -161,36 +173,38 @@
             });
 
             const contador = document.getElementById('contador-resultados');
-            if (contador) contador.innerText = `Mostrando ${resultados.length} jugadores en ${plataformaActual.toUpperCase()}`;
+            if (contador) contador.innerText = `${resultados.length} Jugadores analizados en ${plataformaActual.toUpperCase()}`;
 
-            const contenedor = document.getElementById('contenedor-jugadores');
-            if (contenedor) {
+            const cuerpo = document.getElementById('tabla-cuerpo');
+            if (cuerpo) {
                 if (resultados.length === 0) {
-                    contenedor.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12">No hay resultados para los filtros seleccionados.</div>`;
+                    cuerpo.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500">No se encontraron jugadores con los filtros seleccionados.</td></tr>`;
                     return;
                 }
 
-                contenedor.innerHTML = resultados.map(j => {
+                cuerpo.innerHTML = resultados.map(j => {
                     const esSubida = (j.subida || '').includes('+');
                     return `
-                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-slate-700 transition">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-lg text-white">${j.nombre}</h3>
-                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-0.5 rounded-md font-bold">${j.pos || 'JUG'}</span>
-                            </div>
-                            <p class="text-slate-400 text-sm">⚽ ${j.equipo}</p>
-                            <div class="text-sm space-y-1 pt-2 border-t border-slate-800">
-                                <p class="text-slate-300">📈 Tendencia: <strong class="${esSubida ? 'text-emerald-400' : 'text-red-400'}">${j.subida}</strong></p>
-                                <p class="text-slate-300">💰 Valor ${plataformaActual.toUpperCase()}: <strong class="text-emerald-300">${j.precio}</strong></p>
-                                <p class="text-slate-300">⭐ Media: ${j.pts || '0.0'} pts</p>
-                            </div>
-                        </div>
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="px-4 py-3 font-bold text-white flex items-center gap-2">
+                                <span>⚽</span> ${j.nombre}
+                            </td>
+                            <td class="px-4 py-3 text-slate-400">${j.equipo}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-0.5 rounded-md font-bold">${j.pos}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-slate-200">${j.precio}</td>
+                            <td class="px-4 py-3 text-right font-bold ${esSubida ? 'text-emerald-400' : 'text-red-400'}">
+                                ${j.subida}
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-amber-400">${j.pts}</td>
+                        </tr>
                     `;
                 }).join('');
             }
         }
 
-        window.onload = cargarDatosReales;
+        window.onload = cargarDatosEstadisticas;
     </script>
 </body>
 </html>
