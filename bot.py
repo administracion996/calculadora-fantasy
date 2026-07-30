@@ -16,26 +16,28 @@ def extraer_mercado_paginado():
         page = context.new_page()
 
         try:
-            # 1. Cargar la URL exacta de Analítica Fantasy
+            # 1. Cargar la URL exacta
             page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="networkidle")
-            time.sleep(4)
+            time.sleep(3)
 
-            # 2. Intentar cambiar el selector de "Filas por página" si existe a la opción máxima
+            # 2. CERRAR BANNER DE COOKIES (si existe) para que no bloquee el clic en el botón de página
             try:
-                select_elem = page.query_selector("select")
-                if select_elem:
-                    options = select_elem.query_selector_all("option")
-                    if len(options) > 1:
-                        select_elem.select_option(index=len(options) - 1)
-                        time.sleep(3)
+                banner_cookie = page.query_selector("button:has-text('Aceptar'), button:has-text('ACEPTAR'), button:has-text('Agree'), #onetrust-accept-btn-handler")
+                if banner_cookie and banner_cookie.is_visible():
+                    banner_cookie.click(force=True)
+                    time.sleep(1)
+                    print("🍪 Banner de cookies cerrado.")
             except Exception:
                 pass
 
             pagina_num = 1
-            max_paginas = 60  # Límite alto para recorrer todo el mercado
+            max_paginas = 60  # Recorrer el mercado completo
 
             while pagina_num <= max_paginas:
-                # Extraer las filas de la tabla visibles en la página actual
+                # Esperar a que la tabla contenga filas
+                page.wait_for_selector("tbody tr", timeout=10000)
+                time.sleep(1)
+
                 filas = page.query_selector_all("tbody tr")
                 nuevos_en_esta_pag = 0
 
@@ -69,27 +71,29 @@ def extraer_mercado_paginado():
 
                 print(f"📄 Página {pagina_num}: extraídos {len(filas)} elementos (Total acumulado: {len(jugadores_totales)})")
 
-                # Buscar el botón para ir a la siguiente página
-                # Probamos selectores comunes de paginación (botón '>', 'Siguiente', icono o la siguiente página numérica)
-                bot_siguiente = page.query_selector("button:has-text('>'), [aria-label*='Next'], [aria-label*='siguiente'], .pagination-next, button.next")
-                
-                # Si no lo encuentra por texto/aria, intentar hacer clic en el botón con el número de la siguiente página
-                if not bot_siguiente:
-                    bot_siguiente = page.query_selector(f"button:has-text('{pagina_num + 1}'), a:has-text('{pagina_num + 1}')")
+                # Si no se han añadido nuevos en esta página y ya llevamos más de 3, salir
+                if nuevos_en_esta_pag == 0 and pagina_num > 3:
+                    print("🏁 Fin de la tabla alcanzado.")
+                    break
 
-                if bot_siguiente and bot_siguiente.is_visible() and bot_siguiente.is_enabled():
-                    bot_siguiente.click()
+                # Buscar botón para pasar a la siguiente página (priorizando clic forzado o JS dispatch)
+                bot_siguiente = page.query_selector(f"button:has-text('{pagina_num + 1}'), a:has-text('{pagina_num + 1}')")
+                if not bot_siguiente:
+                    bot_siguiente = page.query_selector("button:has-text('>'), [aria-label*='Next'], [aria-label*='siguiente'], .pagination-next")
+
+                if bot_siguiente and bot_siguiente.is_visible():
+                    # Usamos dispatchEvent o force=True para evitar que se bloquee por timeouts de clic
+                    try:
+                        bot_siguiente.scroll_into_view_if_needed()
+                        bot_siguiente.click(force=True, timeout=5000)
+                    except Exception:
+                        page.evaluate("(el) => el.click()", bot_siguiente)
+
                     time.sleep(2)
                     pagina_num += 1
                 else:
-                    # Si no hay más botones de paginación, intentamos scroll por si es tabla infinita
-                    page.evaluate("window.scrollBy(0, 1000)")
-                    time.sleep(1.5)
-                    filas_nuevas = page.query_selector_all("tbody tr")
-                    if len(filas_nuevas) <= len(filas) and nuevos_en_esta_pag == 0:
-                        print("🏁 Fin de la tabla alcanzado.")
-                        break
-                    pagina_num += 1
+                    print("🏁 No se encontró más botón de siguiente página.")
+                    break
 
             resultado = list(jugadores_totales.values())
 
@@ -99,7 +103,7 @@ def extraer_mercado_paginado():
                     json.dump(base_datos, f, ensure_ascii=False, indent=4)
                 print(f"✅ ¡ÉXITO MASIVO! Guardados {len(resultado)} jugadores de Analítica Fantasy.")
             else:
-                print("❌ No se pudieron capturar datos de la tabla.")
+                print("❌ No se pudieron capturar datos.")
 
         except Exception as e:
             print(f"❌ Error durante el raspado: {e}")
