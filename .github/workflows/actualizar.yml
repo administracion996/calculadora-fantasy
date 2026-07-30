@@ -1,9 +1,9 @@
 name: Actualizar Datos Fantasy Diariamente
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Permite ejecutarlo manualmente cuando quieras
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 5 * * *' # Se ejecuta automáticamente TODAS LAS NOCHES a las 5:00 AM UTC (6:00/7:00 AM España)
 
 permissions:
   contents: write
@@ -29,6 +29,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add .
-          git commit -m "Auto-actualización diaria de datos fantasy" || echo "Sin cambios"
+          git add datos.json
+          git commit -m "Auto-actualización nocturna de la base de datos Fantasy" || echo "Sin cambios"
           git push
