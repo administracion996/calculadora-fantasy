@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_todoterreno_blindada():
-    print("🤖 Activando Escáner Todoterreno (Versión Blindada Antierrores)...")
+def extraccion_comuniate_paginada():
+    print("🤖 Iniciando asalto total a Comuniate (Todas las páginas)...")
     jugadores_dict = {}
 
     with SB(uc=True, headless=True) as sb:
@@ -12,13 +12,12 @@ def extraccion_todoterreno_blindada():
             sb.uc_open_with_reconnect("https://www.comuniate.com/jugadores/comunio", reconnect_time=4)
             sb.sleep(4)
 
-            print("🔄 Forzando el filtro 'LALIGA FANTASY' con escudos activados...")
+            print("🔄 Aplicando el filtro 'LALIGA FANTASY'...")
             sb.execute_script("""
                 try {
                     var selects = document.querySelectorAll('select');
                     for (var i = 0; i < selects.length; i++) {
                         if (!selects[i] || !selects[i].options) continue;
-                        
                         for (var j = 0; j < selects[i].options.length; j++) {
                             var opt = selects[i].options[j];
                             if (opt && opt.text && opt.text.toUpperCase().includes('LALIGA FANTASY')) {
@@ -28,117 +27,138 @@ def extraccion_todoterreno_blindada():
                             }
                         }
                     }
-                } catch(e) { console.log('Error silenciado al cambiar juego'); }
+                } catch(e) { }
             """)
-            sb.sleep(5) 
+            sb.sleep(4) 
 
-            print("📜 Expandiendo la paginación a 'Todos' de forma segura...")
-            sb.execute_script("""
-                try {
-                    var selects = document.querySelectorAll('select');
-                    for (var i = 0; i < selects.length; i++) {
-                        if (selects[i] && selects[i].name && selects[i].name.includes('length')) {
-                            if (selects[i].options && selects[i].options.length > 0) {
-                                var lastOpt = selects[i].options[selects[i].options.length - 1];
-                                if (lastOpt) {
-                                    selects[i].value = lastOpt.value;
-                                    selects[i].dispatchEvent(new Event('change', { bubbles: true }));
-                                    if (typeof jQuery !== 'undefined') jQuery(selects[i]).trigger('change');
-                                }
-                            }
-                        }
-                    }
-                } catch(e) { console.log('Error silenciado al expandir tabla'); }
-            """)
-            sb.sleep(5) 
-
-            print("🔍 Escaneando la pantalla buscando el símbolo '€'...")
-            html = sb.get_page_source()
-            soup = BeautifulSoup(html, 'html.parser')
-
-            elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
-            
-            for el in elementos_precio:
-                padre = el.parent
-                for _ in range(5): 
-                    if padre.name == 'tr' or (padre.name == 'div' and len(padre.find_all('div')) > 2):
-                        break
-                    if padre.parent:
-                        padre = padre.parent
-                        
-                textos = [t.get_text(strip=True) for t in padre.find_all(['td', 'div', 'span', 'a', 'strong', 'h3']) if t.get_text(strip=True)]
+            pagina_actual = 1
+            while True:
+                print(f"📄 Escaneando página {pagina_actual}...")
                 
-                textos_limpios = []
-                for t in textos:
-                    if t not in textos_limpios:
-                        textos_limpios.append(t)
+                # Extraemos el HTML de la página actual
+                html = sb.get_page_source()
+                soup = BeautifulSoup(html, 'html.parser')
 
-                nombre = ""
-                precio = "0 €"
-                pts = "0.0"
-                pos = "JUG"
-                equipo = "LaLiga"
+                # Buscamos las filas de la tabla
+                filas = soup.find_all('tr')
+                jugadores_en_pagina = 0
 
-                for t in textos_limpios:
-                    # Filtramos para no coger el filtro de rangos de precio de la web
-                    if '€' in t and "RANGO" not in t.upper() and "PRECIO" not in t.upper():
-                        precio = t.strip()
-                        break
+                for fila in filas:
+                    texto_fila = fila.get_text(separator=" ", strip=True)
+                    if '€' not in texto_fila:
+                        continue # Si no hay euros, no es un jugador
 
-                a_tag = padre.find('a')
-                if a_tag and len(a_tag.get_text(strip=True)) > 2:
-                    nombre = a_tag.get_text(strip=True)
-                else:
-                    for t in textos_limpios:
-                        if len(t) > 2 and not any(c.isdigit() for c in t) and '€' not in t and t not in ['POR', 'DEF', 'MED', 'DEL', 'PT', 'DF', 'MC', 'DL']:
-                            nombre = t
+                    celdas = fila.find_all(['td', 'th'])
+                    if len(celdas) < 4:
+                        continue
+
+                    # 1. Atrapar Nombre
+                    nombre = ""
+                    a_tag = fila.find('a')
+                    if a_tag and len(a_tag.get_text(strip=True)) > 2:
+                        nombre = a_tag.get_text(strip=True)
+                    else:
+                        for c in celdas:
+                            t = c.get_text(strip=True)
+                            if len(t) > 3 and not any(char.isdigit() for char in t) and '€' not in t:
+                                nombre = t
+                                break
+
+                    if not nombre or nombre.upper() in ["VALOR", "JUGADOR", "PUNTOS", "EQUIPO", "POSICIÓN"]:
+                        continue
+
+                    # 2. Atrapar Precio
+                    precio = "0 €"
+                    for c in celdas:
+                        if '€' in c.text:
+                            precio = c.text.strip()
                             break
 
-                if not nombre or nombre.upper() in ["VALOR", "JUGADOR", "PUNTOS", "EQUIPO", "POSICIÓN", "MERCADO"]:
-                    continue
+                    # 3. Atrapar Posición precisa (Buscamos las siglas exactas en el texto)
+                    pos = "JUG"
+                    posiciones_validas = {'PT': 'POR', 'POR': 'POR', 'DF': 'DEF', 'DEF': 'DEF', 'MC': 'MED', 'MED': 'MED', 'DL': 'DEL', 'DEL': 'DEL'}
+                    for fragmento in fila.stripped_strings:
+                        frag_up = fragmento.upper().strip()
+                        if frag_up in posiciones_validas:
+                            pos = posiciones_validas[frag_up]
+                            break
 
-                for t in textos_limpios:
-                    if len(t) <= 4 and t.replace('.', '').isdigit():
-                        pts = t
-                    txt_up = t.upper()
-                    if txt_up in ['POR', 'DEF', 'MED', 'DEL', 'PT', 'DF', 'MC', 'DL']:
-                        pos_map = {'PT': 'POR', 'DF': 'DEF', 'MC': 'MED', 'DL': 'DEL'}
-                        pos = pos_map.get(txt_up, txt_up)
+                    # 4. Atrapar Equipo (Buscamos en los enlaces o en el alt de la imagen)
+                    equipo = "Desconocido"
+                    # Intento A: Por el atributo 'alt' de la imagen
+                    imgs = fila.find_all('img')
+                    for img in imgs:
+                        alt = img.get('alt', '').strip()
+                        if alt and alt.upper() not in ["FOTO", "JUGADOR", "AVATAR", nombre.upper()]:
+                            equipo = alt.title()
+                            break
+                    # Intento B: Si la imagen no tiene alt, buscamos en el enlace del equipo
+                    if equipo == "Desconocido":
+                        enlaces = fila.find_all('a')
+                        for en in enlaces:
+                            href = en.get('href', '')
+                            if '/equipo/' in href:
+                                equipo = href.split('/')[-1].replace('-', ' ').title()
+                                break
+                    if equipo == "Desconocido":
+                        equipo = "LaLiga"
 
-                imgs = padre.find_all('img')
-                for img in imgs:
-                    alt = img.get('alt', '').upper()
-                    if alt and 'FOTO' not in alt and 'JUGADOR' not in alt and 'AVATAR' not in alt:
-                        equipo = alt.title()
-                        break
+                    # 5. Atrapar Puntos
+                    pts = "0.0"
+                    for c in celdas:
+                        t = c.get_text(strip=True)
+                        if len(t) <= 4 and t.replace('.', '').replace(',', '').isdigit():
+                            pts = t
 
-                if len(nombre) > 2 and nombre not in jugadores_dict and precio != "0 €":
-                    jugadores_dict[nombre] = {
-                        "nombre": nombre, "equipo": equipo, "pos": pos,
-                        "precio": precio, "subida": "0 €", "pts": pts
-                    }
+                    # Guardamos el jugador si es válido
+                    if nombre not in jugadores_dict and "RANGO" not in precio.upper() and "PRECIO" not in precio.upper():
+                        jugadores_dict[nombre] = {
+                            "nombre": nombre, "equipo": equipo, "pos": pos,
+                            "precio": precio, "subida": "0 €", "pts": pts
+                        }
+                        jugadores_en_pagina += 1
+
+                print(f"   -> ¡Capturados {jugadores_en_pagina} chollos en esta página!")
+
+                # --- EL MOTOR DE PAGINACIÓN AUTOMÁTICA ---
+                # Comprobamos si el botón de "Siguiente" está deshabilitado (llegamos al final)
+                fin_de_paginas = sb.execute_script("""
+                    var nextBtn = document.querySelector('.paginate_button.next');
+                    if (!nextBtn) return true; // Si no hay botón, hemos terminado
+                    return nextBtn.classList.contains('disabled'); // Devuelve true si ya no se puede hacer clic
+                """)
+
+                if fin_de_paginas:
+                    print("🛑 ¡Última página alcanzada! El asalto ha terminado.")
+                    break
+                
+                print("➡️ Haciendo clic en 'Siguiente'...")
+                try:
+                    sb.execute_script("document.querySelector('.paginate_button.next').click();")
+                    sb.sleep(2) # Pausa de 2 segundos para que la tabla cargue los nuevos jugadores
+                    pagina_actual += 1
+                except Exception as e:
+                    print(f"⚠️ No se pudo hacer clic en Siguiente: {e}")
+                    break
 
         except Exception as e:
             print(f"❌ Error en la ejecución principal: {e}")
 
-    # --- NUEVA FUNCIÓN DE ORDENADO SEGURO ---
+    # Ordenar y guardar
     def obtener_valor_numerico(precio_str):
-        # Filtra el string y se queda SOLO con los números. Evita que Python explote.
         digitos = ''.join(filter(str.isdigit, precio_str))
         return int(digitos) if digitos else 0
 
     resultado = list(jugadores_dict.values())
     if resultado:
-        # Usamos la función blindada para ordenar
         resultado.sort(key=lambda x: obtener_valor_numerico(x["precio"]), reverse=True)
         
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡ÉXITO! El radar capturó y ordenó limpiamente a {len(resultado)} jugadores.")
+        print(f"✅ ¡MISIÓN COMPLETADA! Base de datos reventada: {len(resultado)} jugadores en total.")
     else:
-        print("❌ El radar escaneó la página, pero no encontró precios válidos.")
+        print("❌ No se encontraron jugadores.")
 
 if __name__ == "__main__":
-    extraccion_todoterreno_blindada()
-    
+    extraccion_comuniate_paginada()
