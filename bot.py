@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_francotirador_fotos():
-    print("🤖 Iniciando asalto (Francotirador: Leyendo posición y escudo directamente de la foto)...")
+def extraccion_tarjetas_comuniate():
+    print("🤖 Iniciando asalto (Escáner de Tarjetas de Jugador por Anclaje Visual)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -13,7 +13,6 @@ def extraccion_francotirador_fotos():
         'DL': 'DEL', 'DEL': 'DEL'
     }
 
-    # Lista de seguridad para los escudos
     equipos_laliga = [
         "Athletic", "Atlético", "Osasuna", "Leganés", "Alavés", 
         "Barcelona", "Getafe", "Girona", "Rayo", "Celta", 
@@ -47,11 +46,10 @@ def extraccion_francotirador_fotos():
             """)
             sb.sleep(4)
 
-            for pag in range(1, 18): # Recorremos hasta la 17
+            for pag in range(1, 20): # Aseguramos llegar hasta el final
                 print(f"📄 Escaneando página {pag}...")
                 
                 if pag > 1:
-                    # FIX: Eliminamos el f-string y concatenamos la variable pag para evitar errores con las { } de JS
                     exito_clic = sb.execute_script("""
                         var target = '""" + str(pag) + """';
                         var btns = document.querySelectorAll('.paginate_button, .pagination a, ul.pagination li a, .page-link, span.paginate_button');
@@ -69,96 +67,103 @@ def extraccion_francotirador_fotos():
 
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
-
-                filas = soup.find_all('tr')
+                
+                # ESTRATEGIA DE ANCLAJE: Buscamos primero las etiquetas de posición (PT, DF, MC, DL)
+                etiquetas_posicion = soup.find_all(['span', 'div', 'b', 'strong', 'p'])
+                tarjetas_procesadas = set()
                 jugadores_pagina = 0
 
-                for fila in filas:
-                    texto_fila = fila.get_text(separator=" ", strip=True)
-                    if '€' not in texto_fila:
-                        continue
-
-                    celdas = fila.find_all(['td', 'th'])
+                for tag in etiquetas_posicion:
+                    texto_tag = tag.get_text(strip=True).upper()
                     
-                    # 1. NOMBRE, PRECIO Y PUNTOS
-                    nombre = ""
-                    precio = "0 €"
-                    pts = "0.0"
-                    
-                    textos_sueltos = [txt for txt in fila.stripped_strings]
-                    for txt in textos_sueltos:
-                        if '€' in txt and "RANGO" not in txt.upper() and "PRECIO" not in txt.upper():
-                            precio = txt
-                        elif len(txt) > 2 and not any(ch.isdigit() for ch in txt) and '€' not in txt and txt.upper() not in ["VALOR", "JUGADOR", "PUNTOS", "EQUIPO", "POSICIÓN", "MERCADO"] and txt.upper() not in mapa_posiciones:
-                            if not nombre:
-                                nombre = txt
-                        elif len(txt) <= 4 and txt.replace('.', '').replace(',', '').isdigit():
-                            pts = txt
-
-                    if not nombre or precio == "0 €":
-                        a_tag = fila.find('a')
+                    if texto_tag in mapa_posiciones:
+                        # Hemos encontrado el "Globito Verde". Ahora subimos para agarrar toda la tarjeta
+                        padre = tag.parent
+                        es_tarjeta = False
+                        for _ in range(6): 
+                            if padre and '€' in padre.get_text():
+                                es_tarjeta = True
+                                break
+                            if padre:
+                                padre = padre.parent
+                        
+                        # Si no tiene precio o ya leímos esta tarjeta, pasamos de largo
+                        if not es_tarjeta or not padre or id(padre) in tarjetas_procesadas:
+                            continue
+                        
+                        tarjetas_procesadas.add(id(padre))
+                        pos = mapa_posiciones[texto_tag]
+                        
+                        # Extraemos todo el texto suelto de la tarjeta
+                        textos_sueltos = [t.strip() for t in padre.stripped_strings if t.strip()]
+                        
+                        # 1. NOMBRE (Suele estar en un enlace <a> o ser el primer texto largo)
+                        nombre = ""
+                        a_tag = padre.find('a')
                         if a_tag and len(a_tag.get_text(strip=True)) > 2:
                             nombre = a_tag.get_text(strip=True)
-                            
-                    if not nombre or precio == "0 €":
-                        continue
-
-                    # 2. POSICIÓN Y EQUIPO (FRANCOTIRADOR: SOLO EN LA CELDA DE LA FOTO)
-                    pos = "MED" # Por defecto
-                    equipo = "LaLiga" # Por defecto
-                    
-                    for celda in celdas:
-                        imgs = celda.find_all('img')
-                        if not imgs:
-                            continue
-                            
-                        # Extraemos la POSICIÓN leyendo solo los globitos de texto al lado de la cara
-                        textos_celda = [t.strip().upper() for t in celda.stripped_strings]
-                        for txt in textos_celda:
-                            if txt in mapa_posiciones:
-                                pos = mapa_posiciones[txt]
-                                break
+                        else:
+                            for t in textos_sueltos:
+                                if len(t) > 2 and not any(c.isdigit() for c in t) and '€' not in t and t.upper() not in mapa_posiciones:
+                                    if t.upper() not in ["IDEAL:", "MÁX.:", "IDEAL", "MÁX"]:
+                                        nombre = t
+                                        break
                         
-                        # Extraemos el EQUIPO analizando los escudos de esta misma celda
-                        for img in imgs:
+                        if not nombre:
+                            continue
+
+                        # 2. PRECIO (Evitando los textos secundarios como "Ideal:" o "Máx.:")
+                        precio = "0 €"
+                        for i, t in enumerate(textos_sueltos):
+                            if '€' in t:
+                                prev_t = textos_sueltos[i-1].upper() if i > 0 else ""
+                                if "IDEAL" not in prev_t and "MÁX" not in prev_t and "IDEAL" not in t.upper() and "MÁX" not in t.upper():
+                                    precio = t.replace('€', '').strip() + " €"
+                                    break
+                        
+                        # 3. PUNTOS (El número suelto que acompaña a la posición en el globito azul)
+                        pts = "0.0"
+                        for t in textos_sueltos:
+                            t_clean = t.replace('.', '').replace(',', '')
+                            if t_clean.isdigit() and len(t_clean) <= 4 and t != texto_tag:
+                                pts = t
+                                break
+                                
+                        # 4. EQUIPO (Buscando el pequeño escudo en las imágenes)
+                        equipo = "LaLiga"
+                        for img in padre.find_all('img'):
                             src = img.get('src', '').lower()
                             alt = img.get('alt', '').strip().upper()
                             
-                            # Filtramos la cara del jugador
                             if nombre.upper() in alt or "AVATAR" in src or "JUGADOR" in src:
                                 continue
                                 
-                            # Si es un escudo, lo identificamos
                             for eq in equipos_laliga:
-                                if eq.lower() in src or eq.upper() in alt:
+                                eq_norm = eq.lower().replace(" ", "-")
+                                eq_norm_no_accents = eq_norm.replace('é','e').replace('á','a').replace('í','i').replace('ó','o').replace('ú','u')
+                                
+                                if eq.lower() in src or eq_norm in src or eq_norm_no_accents in src or eq.upper() in alt:
                                     equipo = eq
                                     if equipo == "Madrid": equipo = "Real Madrid"
                                     if equipo == "Sociedad": equipo = "Real Sociedad"
                                     break
-                                    
+                            
                             if equipo != "LaLiga":
-                                break 
-                        
-                        break
+                                break
 
-                    # Guardar
-                    if nombre not in jugadores_dict:
-                        jugadores_dict[nombre] = {
-                            "nombre": nombre,
-                            "equipo": equipo,
-                            "pos": pos,
-                            "precio": precio,
-                            "subida": "0 €",
-                            "pts": pts
-                        }
-                        jugadores_pagina += 1
+                        # Guardamos en el diccionario
+                        if nombre not in jugadores_dict and precio != "0 €":
+                            jugadores_dict[nombre] = {
+                                "nombre": nombre, "equipo": equipo, "pos": pos,
+                                "precio": precio, "subida": "0 €", "pts": pts
+                            }
+                            jugadores_pagina += 1
 
                 print(f"   -> ¡Capturados {jugadores_pagina} jugadores en página {pag}!")
 
         except Exception as e:
             print(f"❌ Error durante la extracción: {e}")
 
-    # Ordenar y guardar
     def obtener_valor_numerico(precio_str):
         digitos = ''.join(filter(str.isdigit, precio_str))
         return int(digitos) if digitos else 0
@@ -166,13 +171,12 @@ def extraccion_francotirador_fotos():
     resultado = list(jugadores_dict.values())
     if resultado:
         resultado.sort(key=lambda x: obtener_valor_numerico(x["precio"]), reverse=True)
-        
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡MISIÓN COMPLETADA! {len(resultado)} jugadores extraídos leyendo la tarjeta de la foto.")
+        print(f"✅ ¡MISIÓN COMPLETADA! {len(resultado)} jugadores extraídos leyendo las tarjetas visuales.")
     else:
-        print("❌ No se encontraron jugadores.")
+        print("❌ El escáner funcionó, pero no logró reconstruir las tarjetas.")
 
 if __name__ == "__main__":
-    extraccion_francotirador_fotos()
+    extraccion_tarjetas_comuniate()
