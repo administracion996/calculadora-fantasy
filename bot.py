@@ -1,44 +1,51 @@
 import json
 import urllib.request
+import re
 
-def obtener_datos_completos():
-    print("🤖 Descargando base de datos completa para LaLiga Fantasy...")
+def extraer_analitica_fantasy_directo():
+    print("🤖 Conectando directamente con Analítica Fantasy (Mercado LaLiga)...")
 
-    # Conexión directa a la base de datos masiva de LaLiga
-    url = "https://api.biwenger.com/v2/competitions/la-liga/data?lang=es&score=1"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    # URL exacta de Analítica Fantasy para Mercado LaLiga Fantasy
+    url = "https://www.analiticafantasy.com/api/players?game=fantasy" 
+    
+    # Simular navegador real para evitar bloqueos
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        'Referer': 'https://www.analiticafantasy.com/fantasy-la-liga/mercado',
+        'Accept': 'application/json, text/plain, */*'
+    }
 
     try:
         req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=20) as response:
-            res_json = json.loads(response.read().decode('utf-8'))
-            players_dict = res_json.get("data", {}).get("players", {})
+        with urllib.request.urlopen(req, timeout=25) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            
+            # Si responde la lista de jugadores directamente
+            raw_players = res_data if isinstance(res_data, list) else res_data.get("players", res_data.get("data", []))
 
             jugadores = []
 
-            for p_id, p in players_dict.items():
-                nombre = p.get("name", "Jugador")
-                equipo = p.get("teamName", "LaLiga")
-                pos_id = p.get("position", 3)
+            for p in raw_players:
+                nombre = p.get("nickname", p.get("name", "Jugador"))
+                equipo = p.get("teamName", p.get("team", {}).get("name", "LaLiga"))
+                pos = p.get("position", "MED")
                 
-                pos_map = {1: "POR", 2: "DEF", 3: "MED", 4: "DEL"}
-                pos = pos_map.get(pos_id, "MED")
+                # Valores de mercado de Analítica Fantasy
+                precio = p.get("marketValue", p.get("price", 0))
+                incremento = p.get("marketValueIncrement", p.get("priceIncrement", 0))
+                puntos = str(p.get("pointsAverage", p.get("points", 0)))
 
-                # Valores de LaLiga Fantasy (Presupuestos x5)
-                precio_base = p.get("price", 500000) * 5
-                subida_base = p.get("priceIncrement", 0) * 5
-                puntos = str(p.get("fitness", [0])[-1] if isinstance(p.get("fitness"), list) and p.get("fitness") else 0)
-
-                if subida_base >= 0:
-                    str_subida = f"+ {subida_base:,} €".replace(',', '.')
+                # Formatear la subida/bajada diario
+                if incremento >= 0:
+                    str_subida = f"+ {incremento:,} €".replace(',', '.')
                 else:
-                    str_subida = f"- {abs(subida_base):,} €".replace(',', '.')
+                    str_subida = f"- {abs(incremento):,} €".replace(',', '.')
 
                 jugadores.append({
                     "nombre": nombre,
                     "equipo": equipo,
                     "pos": pos,
-                    "precio": f"{precio_base:,} €".replace(',', '.'),
+                    "precio": f"{precio:,} €".replace(',', '.'),
                     "subida": str_subida,
                     "pts": puntos
                 })
@@ -52,10 +59,50 @@ def obtener_datos_completos():
             with open("datos.json", "w", encoding="utf-8") as f:
                 json.dump(datos_finales, f, ensure_ascii=False, indent=4)
 
-            print(f"✅ ¡ÉXITO! {len(jugadores)} jugadores reales guardados.")
+            print(f"✅ ¡ÉXITO! Extraídos {len(jugadores)} jugadores directamente de Analítica Fantasy.")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"⚠️ Error en API directa, activando plan B para Analítica Fantasy: {e}")
+        # Si la API privada requiere token, usamos respaldo con scrape de HTML embebido de Analítica
+        extraer_html_analitica()
+
+def extraer_html_analitica():
+    url = "https://www.analiticafantasy.com/fantasy-la-liga/mercado"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=25) as response:
+            html = response.read().decode('utf-8')
+            
+            # Buscar datos JSON incrustados en la página web de Analítica Fantasy
+            match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html)
+            if match:
+                data_json = json.loads(match.group(1))
+                players_raw = data_json.get("props", {}).get("pageProps", {}).get("players", [])
+                
+                jugadores = []
+                for p in players_raw:
+                    nombre = p.get("name", "Jugador")
+                    equipo = p.get("teamName", "LaLiga")
+                    precio = p.get("price", 0)
+                    inc = p.get("increment", 0)
+                    
+                    jugadores.append({
+                        "nombre": nombre,
+                        "equipo": equipo,
+                        "pos": p.get("position", "MED"),
+                        "precio": f"{precio:,} €".replace(',', '.'),
+                        "subida": f"+ {inc:,} €".replace(',', '.') if inc >= 0 else f"- {abs(inc):,} €".replace(',', '.'),
+                        "pts": str(p.get("points", 0))
+                    })
+
+                with open("datos.json", "w", encoding="utf-8") as f:
+                    json.dump({"laliga": {"chollos": jugadores}}, f, ensure_ascii=False, indent=4)
+                print(f"✅ ¡ÉXITO PLAN B! {len(jugadores)} jugadores leídos de Analítica Fantasy.")
+    except Exception as err:
+        print(f"❌ Error final extrayendo Analítica Fantasy: {err}")
 
 if __name__ == "__main__":
-    obtener_datos_completos()
+    extraer_analitica_fantasy_directo()
