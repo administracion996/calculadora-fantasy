@@ -2,8 +2,8 @@ import json
 import time
 from playwright.sync_api import sync_playwright
 
-def extraer_mercado_paginado():
-    print("🤖 Iniciando navegación interactiva por páginas en Analítica Fantasy...")
+def extraer_mercado_infinito():
+    print("🤖 Navegación con timeout desactivado para Analítica Fantasy...")
     
     jugadores_totales = {}
 
@@ -13,87 +13,103 @@ def extraer_mercado_paginado():
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
             viewport={"width": 1400, "height": 900}
         )
+        # Timeout desactivado globalmente a nivel de página (0 = Infinito)
         page = context.new_page()
+        page.set_default_timeout(0)
 
         try:
-            # 1. Cargar la URL exacta
-            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", timeout=60000, wait_until="networkidle")
-            time.sleep(3)
+            # 1. Cargar la URL sin límite de tiempo duro
+            page.goto("https://www.analiticafantasy.com/fantasy-la-liga/mercado", wait_until="commit")
+            time.sleep(5)
 
-            # 2. CERRAR BANNER DE COOKIES (si existe) para que no bloquee el clic en el botón de página
+            # Cerrar cookies si saltan
             try:
-                banner_cookie = page.query_selector("button:has-text('Aceptar'), button:has-text('ACEPTAR'), button:has-text('Agree'), #onetrust-accept-btn-handler")
-                if banner_cookie and banner_cookie.is_visible():
-                    banner_cookie.click(force=True)
-                    time.sleep(1)
-                    print("🍪 Banner de cookies cerrado.")
+                page.evaluate("""() => {
+                    const btn = document.querySelector("button:has-text('Aceptar'), button:has-text('ACEPTAR'), #onetrust-accept-btn-handler");
+                    if (btn) btn.click();
+                }""")
             except Exception:
                 pass
 
             pagina_num = 1
-            max_paginas = 60  # Recorrer el mercado completo
+            max_paginas = 80
 
             while pagina_num <= max_paginas:
-                # Esperar a que la tabla contenga filas
-                page.wait_for_selector("tbody tr", timeout=10000)
-                time.sleep(1)
+                time.sleep(1.5) # Pausa estable para dejar pintar al cliente
 
-                filas = page.query_selector_all("tbody tr")
-                nuevos_en_esta_pag = 0
+                # Extraer filas directamente mediante ejecucion JS interna para evitar bloqueos del locator
+                filas_js = page.evaluate("""() => {
+                    const trs = document.querySelectorAll("tbody tr");
+                    const res = [];
+                    trs.forEach(tr => {
+                        const tds = tr.querySelectorAll("td");
+                        if (tds.length >= 4) {
+                            res.push({
+                                nom: tds[0] ? tds[0].innerText.trim() : "",
+                                eq: tds[1] ? tds[1].innerText.trim() : "LaLiga",
+                                val: tds[2] ? tds[2].innerText.trim() : "0 €",
+                                sub: tds[3] ? tds[3].innerText.trim() : "0 €",
+                                pt: tds[4] ? tds[4].innerText.trim() : "0.0"
+                            });
+                        }
+                    });
+                    return res;
+                }""")
 
-                for fila in filas:
-                    celdas = fila.query_selector_all("td")
-                    if len(celdas) >= 4:
-                        textos_nombre = celdas[0].inner_text().strip().split("\n")
-                        nombre = textos_nombre[0].strip() if textos_nombre else ""
-                        
-                        # Limpiar número de posición/ranking si lo lleva pegado
-                        if nombre and nombre[0].isdigit():
-                            partes = nombre.split()
-                            if len(partes) > 1 and partes[0].isdigit():
-                                nombre = " ".join(partes[1:])
+                nuevos_en_pag = 0
+                for item in filas_js:
+                    lineas = item["nom"].split("\n")
+                    nombre = lineas[0].strip() if lineas else ""
 
-                        equipo = celdas[1].inner_text().strip().split("\n")[0] if len(celdas) > 1 else "LaLiga"
-                        precio = celdas[2].inner_text().strip().split("\n")[0] if len(celdas) > 2 else "0 €"
-                        subida = celdas[3].inner_text().strip().split("\n")[0] if len(celdas) > 3 else "0 €"
-                        pts = celdas[4].inner_text().strip().split("\n")[0] if len(celdas) > 4 else "0.0"
+                    # Limpiar ranking
+                    if nombre and nombre[0].isdigit():
+                        partes = nombre.split()
+                        if len(partes) > 1 and partes[0].isdigit():
+                            nombre = " ".join(partes[1:])
 
-                        if nombre and nombre not in jugadores_totales:
-                            jugadores_totales[nombre] = {
-                                "nombre": nombre,
-                                "equipo": equipo,
-                                "pos": "JUG",
-                                "precio": precio,
-                                "subida": subida,
-                                "pts": pts
-                            }
-                            nuevos_en_esta_pag += 1
+                    equipo = item["eq"].split("\n")[0]
+                    precio = item["val"].split("\n")[0]
+                    subida = item["sub"].split("\n")[0]
+                    pts = item["pt"].split("\n")[0]
 
-                print(f"📄 Página {pagina_num}: extraídos {len(filas)} elementos (Total acumulado: {len(jugadores_totales)})")
+                    if nombre and nombre not in jugadores_totales:
+                        jugadores_totales[nombre] = {
+                            "nombre": nombre,
+                            "equipo": equipo,
+                            "pos": "JUG",
+                            "precio": precio,
+                            "subida": subida,
+                            "pts": pts
+                        }
+                        nuevos_en_pag += 1
 
-                # Si no se han añadido nuevos en esta página y ya llevamos más de 3, salir
-                if nuevos_en_esta_pag == 0 and pagina_num > 3:
-                    print("🏁 Fin de la tabla alcanzado.")
-                    break
+                print(f"📄 Página {pagina_num}: leídos {len(filas_js)} elementos (Total acumulado: {len(jugadores_totales)})")
 
-                # Buscar botón para pasar a la siguiente página (priorizando clic forzado o JS dispatch)
-                bot_siguiente = page.query_selector(f"button:has-text('{pagina_num + 1}'), a:has-text('{pagina_num + 1}')")
-                if not bot_siguiente:
-                    bot_siguiente = page.query_selector("button:has-text('>'), [aria-label*='Next'], [aria-label*='siguiente'], .pagination-next")
+                # Intentar avanzar de página ejecutando click directo en JS sin esperar locators
+                avanzo = page.evaluate("""(numSig) => {
+                    // Buscar botón con el número de la siguiente página o flechas
+                    const btns = Array.from(document.querySelectorAll("button, a, div[role='button']"));
+                    let target = btns.find(b => b.innerText.trim() === String(numSig));
+                    if (!target) {
+                        target = btns.find(b => b.innerText.trim() === '>' || b.getAttribute('aria-label')?.includes('next'));
+                    }
+                    if (target) {
+                        target.click();
+                        return true;
+                    }
+                    return false;
+                }""", pagina_num + 1)
 
-                if bot_siguiente and bot_siguiente.is_visible():
-                    # Usamos dispatchEvent o force=True para evitar que se bloquee por timeouts de clic
-                    try:
-                        bot_siguiente.scroll_into_view_if_needed()
-                        bot_siguiente.click(force=True, timeout=5000)
-                    except Exception:
-                        page.evaluate("(el) => el.click()", bot_siguiente)
-
-                    time.sleep(2)
+                if avanzo:
                     pagina_num += 1
                 else:
-                    print("🏁 No se encontró más botón de siguiente página.")
-                    break
+                    # Si no hay botón numérico, scroll progresivo
+                    page.evaluate("window.scrollBy(0, 1200)")
+                    time.sleep(1)
+                    if nuevos_en_pag == 0 and pagina_num > 4:
+                        print("🏁 No se encontraron más páginas ni filas nuevas.")
+                        break
+                    pagina_num += 1
 
             resultado = list(jugadores_totales.values())
 
@@ -101,9 +117,9 @@ def extraer_mercado_paginado():
                 base_datos = {"laliga": {"chollos": resultado}}
                 with open("datos.json", "w", encoding="utf-8") as f:
                     json.dump(base_datos, f, ensure_ascii=False, indent=4)
-                print(f"✅ ¡ÉXITO MASIVO! Guardados {len(resultado)} jugadores de Analítica Fantasy.")
+                print(f"✅ ¡ÉXITO! Guardados {len(resultado)} jugadores reales de Analítica Fantasy.")
             else:
-                print("❌ No se pudieron capturar datos.")
+                print("❌ No se obtuvieron registros de la tabla.")
 
         except Exception as e:
             print(f"❌ Error durante el raspado: {e}")
@@ -111,4 +127,4 @@ def extraer_mercado_paginado():
             browser.close()
 
 if __name__ == "__main__":
-    extraer_mercado_paginado()
+    extraer_mercado_infinito()
