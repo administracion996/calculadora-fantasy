@@ -1,0 +1,22 @@
+{
+    "biwenger": {
+        "chollos": [
+            {"nombre": "Lamine Yamal", "equipo": "FC Barcelona", "pos": "DEL", "precio": "22.100.000 €", "subida": "+ 450.000 €", "pts": "8.8"},
+            {"nombre": "Kylian Mbappé", "equipo": "Real Madrid", "pos": "DEL", "precio": "24.500.000 €", "subida": "+ 680.000 €", "pts": "9.4"},
+            {"nombre": "Raphinha", "equipo": "FC Barcelona", "pos": "DEL", "precio": "19.800.000 €", "subida": "+ 520.000 €", "pts": "9.1"},
+            {"nombre": "Pedri", "equipo": "FC Barcelona", "pos": "MED", "precio": "15.400.000 €", "subida": "+ 210.000 €", "pts": "7.9"}
+        ]
+    },
+    "laliga": {
+        "chollos": [
+            {"nombre": "Lamine Yamal", "equipo": "FC Barcelona", "pos": "DEL", "precio": "125.000.000 €", "subida": "+ 1.450.000 €", "pts": "8.8"},
+            {"nombre": "Kylian Mbappé", "equipo": "Real Madrid", "pos": "DEL", "precio": "182.000.000 €", "subida": "+ 2.100.000 €", "pts": "9.4"}
+        ]
+    },
+    "comunio": {
+        "chollos": [
+            {"nombre": "Lamine Yamal", "equipo": "FC Barcelona", "pos": "DEL", "precio": "18.200.000 €", "subida": "+ 280.000 €", "pts": "8.8"},
+            {"nombre": "Kylian Mbappé", "equipo": "Real Madrid", "pos": "DEL", "precio": "21.000.000 €", "subida": "+ 410.000 €", "pts": "9.4"}
+        ]
+    }
+}
