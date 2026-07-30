@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_comuniate_vision_escudos():
-    print("🤖 Iniciando asalto (Paginación 1-17 + Lector de Escudos y Tarjetas)...")
+def extraccion_francotirador_fotos():
+    print("🤖 Iniciando asalto (Francotirador: Leyendo posición y escudo directamente de la foto)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -13,7 +13,7 @@ def extraccion_comuniate_vision_escudos():
         'DL': 'DEL', 'DEL': 'DEL'
     }
 
-    # Diccionario de seguridad para relacionar nombres de archivos de escudos con el equipo real
+    # Lista de seguridad para los escudos
     equipos_laliga = [
         "Athletic", "Atlético", "Osasuna", "Leganés", "Alavés", 
         "Barcelona", "Getafe", "Girona", "Rayo", "Celta", 
@@ -47,7 +47,7 @@ def extraccion_comuniate_vision_escudos():
             """)
             sb.sleep(4)
 
-            for pag in range(1, 20):
+            for pag in range(1, 18): # Recorremos hasta la 17
                 print(f"📄 Escaneando página {pag}...")
                 
                 if pag > 1:
@@ -63,7 +63,6 @@ def extraccion_comuniate_vision_escudos():
                         return false;
                     """)
                     if not exito_clic:
-                        print(f"🛑 Fin de la paginación alcanzado (No existe la página {pag}).")
                         break
                     sb.sleep(2.5) 
 
@@ -78,13 +77,14 @@ def extraccion_comuniate_vision_escudos():
                     if '€' not in texto_fila:
                         continue
 
-                    # 1. NOMBRE Y PRECIO
+                    celdas = fila.find_all(['td', 'th'])
+                    
+                    # 1. NOMBRE, PRECIO Y PUNTOS (Igual que antes, rastreando toda la fila)
                     nombre = ""
                     precio = "0 €"
                     pts = "0.0"
                     
                     textos_sueltos = [txt for txt in fila.stripped_strings]
-                    
                     for txt in textos_sueltos:
                         if '€' in txt and "RANGO" not in txt.upper() and "PRECIO" not in txt.upper():
                             precio = txt
@@ -95,7 +95,6 @@ def extraccion_comuniate_vision_escudos():
                             pts = txt
 
                     if not nombre or precio == "0 €":
-                        # Intento extra para el nombre a través de enlaces si el método anterior falló
                         a_tag = fila.find('a')
                         if a_tag and len(a_tag.get_text(strip=True)) > 2:
                             nombre = a_tag.get_text(strip=True)
@@ -103,33 +102,48 @@ def extraccion_comuniate_vision_escudos():
                     if not nombre or precio == "0 €":
                         continue
 
-                    # 2. POSICIÓN (Cazando las siglas de los globitos)
-                    pos = "MED"
-                    for txt in textos_sueltos:
-                        if txt.upper() in mapa_posiciones:
-                            pos = mapa_posiciones[txt.upper()]
-                            break
-
-                    # 3. EQUIPO (Inspeccionando los Escudos de la imagen que pasaste)
-                    equipo = "LaLiga"
-                    imgs = fila.find_all('img')
-                    for img in imgs:
-                        src = img.get('src', '').lower()
-                        alt = img.get('alt', '').upper()
+                    # 2. POSICIÓN Y EQUIPO (FRANCOTIRADOR: SOLO EN LA CELDA DE LA FOTO)
+                    pos = "MED" # Por defecto
+                    equipo = "LaLiga" # Por defecto
+                    
+                    for celda in celdas:
+                        imgs = celda.find_all('img')
+                        # Si esta celda no tiene imágenes, la ignoramos. Solo queremos la del bloque visual.
+                        if not imgs:
+                            continue
+                            
+                        # Extraemos la POSICIÓN leyendo solo los globitos de texto al lado de la cara
+                        textos_celda = [t.strip().upper() for t in celda.stripped_strings]
+                        for txt in textos_celda:
+                            if txt in mapa_posiciones:
+                                pos = mapa_posiciones[txt]
+                                break
                         
-                        # Analizamos todas las imágenes en busca del escudo
-                        # Descartamos la foto principal del jugador
-                        if nombre.upper() not in alt and "AVATAR" not in alt and "FOTO" not in alt:
-                            # Comprobamos la lista de equipos contra el nombre del archivo de imagen o su alt
+                        # Extraemos el EQUIPO analizando los escudos de esta misma celda
+                        for img in imgs:
+                            src = img.get('src', '').lower()
+                            alt = img.get('alt', '').strip().upper()
+                            
+                            # Filtramos la cara del jugador
+                            if nombre.upper() in alt or "AVATAR" in src or "JUGADOR" in src:
+                                continue
+                                
+                            # Si es un escudo, lo identificamos
                             for eq in equipos_laliga:
                                 if eq.lower() in src or eq.upper() in alt:
                                     equipo = eq
+                                    # Correcciones de nombres
                                     if equipo == "Madrid": equipo = "Real Madrid"
                                     if equipo == "Sociedad": equipo = "Real Sociedad"
                                     break
-                        if equipo != "LaLiga":
-                            break
+                                    
+                            if equipo != "LaLiga":
+                                break # Encontramos el equipo, paramos de buscar imágenes
+                        
+                        # Si ya hemos analizado la celda con la foto, no miramos más celdas
+                        break
 
+                    # Guardar
                     if nombre not in jugadores_dict:
                         jugadores_dict[nombre] = {
                             "nombre": nombre,
@@ -146,6 +160,7 @@ def extraccion_comuniate_vision_escudos():
         except Exception as e:
             print(f"❌ Error durante la extracción: {e}")
 
+    # Ordenar y guardar
     def obtener_valor_numerico(precio_str):
         digitos = ''.join(filter(str.isdigit, precio_str))
         return int(digitos) if digitos else 0
@@ -157,9 +172,9 @@ def extraccion_comuniate_vision_escudos():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡MÁXIMA PRECISIÓN! {len(resultado)} jugadores extraídos con escudos y posiciones reales.")
+        print(f"✅ ¡MISIÓN COMPLETADA! {len(resultado)} jugadores extraídos leyendo la tarjeta de la foto.")
     else:
         print("❌ No se encontraron jugadores.")
 
 if __name__ == "__main__":
-    extraccion_comuniate_vision_escudos()
+    extraccion_francotirador_fotos()
