@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_total_comuniate():
-    print("🤖 Iniciando asalto (Extracción por Filas Garantizadas)...")
+def extraccion_total_tarjetas():
+    print("🤖 Iniciando asalto (Escáner de Tarjetas Elástico para capturar el 100%)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -61,21 +61,15 @@ def extraccion_total_comuniate():
             """)
             sb.sleep(4)
 
-            for pag in range(1, 22): 
+            for pag in range(1, 25): 
                 print(f"📄 Escaneando página {pag}...")
                 
                 if pag > 1:
                     exito_clic = sb.execute_script("""
                         try {
-                            if (typeof jQuery !== 'undefined' && jQuery('table.dataTable').length > 0) {
-                                var table = jQuery('table.dataTable').DataTable();
-                                var info = table.page.info();
-                                if (info.page + 1 < info.pages) {
-                                    table.page(info.page + 1).draw('page');
-                                    return true;
-                                }
-                            }
+                            var target = '""" + str(pag) + """';
                             
+                            // 1. Botón derecho directo
                             var current = document.querySelector('.paginate_button.current, li.active, span.current');
                             if (current && current.nextElementSibling) {
                                 var nextL = current.nextElementSibling.querySelector('a') || current.nextElementSibling;
@@ -85,7 +79,7 @@ def extraccion_total_comuniate():
                                 }
                             }
                             
-                            var target = '""" + str(pag) + """';
+                            // 2. Número exacto
                             var btns = document.querySelectorAll('.paginate_button, .pagination a, ul.pagination li a, .page-link, span.paginate_button');
                             for (var i = 0; i < btns.length; i++) {
                                 if (btns[i].innerText.trim() === target) {
@@ -93,12 +87,19 @@ def extraccion_total_comuniate():
                                     return true;
                                 }
                             }
+                            
+                            // 3. Botón 'Siguiente'
+                            var nextBtn = document.querySelector('.next, [aria-label="Next"], [rel="next"]');
+                            if (nextBtn && !nextBtn.classList.contains('disabled')) {
+                                (nextBtn.querySelector('a') || nextBtn).click();
+                                return true;
+                            }
                         } catch(e) {}
                         return false;
                     """)
                     
                     if not exito_clic:
-                        print(f"🛑 Fin del recorrido alcanzado. No hay más páginas.")
+                        print(f"🛑 No se encontró la página {pag}. Fin de la paginación.")
                         break
                         
                     sb.sleep(3)
@@ -106,16 +107,31 @@ def extraccion_total_comuniate():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # LA CLAVE: Iterar por cada fila <tr> garantizando que es 1 jugador
-                filas = soup.find_all('tr')
+                # ESTRATEGIA DEFINITIVA: Anclaje al '€' y subida elástica
+                elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
+                tarjetas_procesadas = set()
                 jugadores_pagina = 0
 
-                for fila in filas:
-                    # Si no hay símbolo del euro, es una cabecera, la saltamos
-                    if '€' not in fila.get_text():
+                for tag in elementos_precio:
+                    # Descartamos textos sueltos que no son del jugador
+                    if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
                         continue
                         
-                    textos_sueltos = [t.strip() for t in fila.stripped_strings if t.strip()]
+                    # Subimos por el árbol HTML hasta encontrar la caja que contiene imágenes (la tarjeta)
+                    tarjeta = tag.parent
+                    for _ in range(12): # Límite elástico amplio
+                        if tarjeta and tarjeta.find('img'):
+                            break
+                        if tarjeta and tarjeta.parent:
+                            tarjeta = tarjeta.parent
+                            
+                    # Si no pudimos envolver una imagen o ya procesamos esta tarjeta, saltamos
+                    if not tarjeta or not tarjeta.find('img') or id(tarjeta) in tarjetas_procesadas:
+                        continue
+                        
+                    tarjetas_procesadas.add(id(tarjeta))
+                    
+                    textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
                     # 1. POSICIÓN
                     pos = "JUG"
@@ -126,17 +142,13 @@ def extraccion_total_comuniate():
                             
                     # 2. NOMBRE
                     nombre = ""
-                    # Intento 1: A través de enlaces de la fila
-                    for a in fila.find_all('a'):
-                        href = a.get('href', '').lower()
-                        if '/equipo/' not in href and len(a.get_text(strip=True)) > 2:
-                            nombre = a.get_text(strip=True)
-                            break
-                    # Intento 2: Lectura de textos puros
-                    if not nombre:
+                    a_tag = tarjeta.find('a')
+                    if a_tag and len(a_tag.get_text(strip=True)) > 2:
+                        nombre = a_tag.get_text(strip=True)
+                    else:
                         for t in textos_sueltos:
                             if len(t) > 2 and not any(c.isdigit() for c in t) and '€' not in t and t.upper() not in mapa_posiciones:
-                                if t.upper() not in ["IDEAL:", "MÁX.:", "IDEAL", "MÁX", "VALOR", "PUNTOS", "JUGADOR", "EQUIPO"]:
+                                if t.upper() not in ["IDEAL:", "MÁX.:", "IDEAL", "MÁX", "VALOR", "PUNTOS", "EQUIPO"]:
                                     nombre = t
                                     break
                                     
@@ -159,11 +171,10 @@ def extraccion_total_comuniate():
                         if t_clean.isdigit() and len(t_clean) <= 4 and t != precio.replace(' €', ''):
                             pts = t
                             break
-                            
+
                     # 5. EQUIPO
                     equipo = "LaLiga"
-                    # Buscar en enlaces
-                    for a in fila.find_all('a', href=True):
+                    for a in tarjeta.find_all('a', href=True):
                         href = a['href'].lower()
                         if '/equipo/' in href:
                             slug = href.split('/equipo/')[-1].split('/')[0]
@@ -173,9 +184,8 @@ def extraccion_total_comuniate():
                                     break
                         if equipo != "LaLiga": break
 
-                    # Buscar en imágenes (escudos)
                     if equipo == "LaLiga":
-                        for img in fila.find_all('img'):
+                        for img in tarjeta.find_all('img'):
                             src = img.get('src', '').lower()
                             alt = img.get('alt', '').strip().lower()
                             title = img.get('title', '').strip().lower()
@@ -190,8 +200,8 @@ def extraccion_total_comuniate():
                             
                             if equipo != "LaLiga": break
 
-                    # Guardado Seguro
-                    if nombre not in jugadores_dict:
+                    # Guardado final
+                    if nombre not in jugadores_dict and precio != "0 €":
                         jugadores_dict[nombre] = {
                             "nombre": nombre, "equipo": equipo, "pos": pos,
                             "precio": precio, "subida": "0 €", "pts": pts
@@ -216,10 +226,9 @@ def extraccion_total_comuniate():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡MISIÓN DEFINITIVA COMPLETADA! {len(resultado)} jugadores registrados.")
+        print(f"✅ ¡LA BASE DE DATOS ESTÁ COMPLETA! Se capturaron {len(resultado)} chollos.")
     else:
         print("❌ No se encontraron jugadores.")
 
 if __name__ == "__main__":
-    extraccion_total_comuniate()
-    
+    extraccion_total_tarjetas()
