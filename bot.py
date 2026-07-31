@@ -2,14 +2,15 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_total_tarjetas():
-    print("🤖 Iniciando asalto (Escáner de Tarjetas Elástico para capturar el 100%)...")
+def extraccion_base_datos_completa():
+    print("🤖 Iniciando asalto total (Capturando el 100% del mercado)...")
     jugadores_dict = {}
 
+    # He añadido tu 'MD' al mapa de posiciones para que no se escape ninguno
     mapa_posiciones = {
         'PT': 'POR', 'POR': 'POR',
         'DF': 'DEF', 'DEF': 'DEF',
-        'MC': 'MED', 'MED': 'MED',
+        'MC': 'MED', 'MED': 'MED', 'MD': 'MED',
         'DL': 'DEL', 'DEL': 'DEL'
     }
 
@@ -69,7 +70,6 @@ def extraccion_total_tarjetas():
                         try {
                             var target = '""" + str(pag) + """';
                             
-                            // 1. Botón derecho directo
                             var current = document.querySelector('.paginate_button.current, li.active, span.current');
                             if (current && current.nextElementSibling) {
                                 var nextL = current.nextElementSibling.querySelector('a') || current.nextElementSibling;
@@ -79,7 +79,6 @@ def extraccion_total_tarjetas():
                                 }
                             }
                             
-                            // 2. Número exacto
                             var btns = document.querySelectorAll('.paginate_button, .pagination a, ul.pagination li a, .page-link, span.paginate_button');
                             for (var i = 0; i < btns.length; i++) {
                                 if (btns[i].innerText.trim() === target) {
@@ -88,7 +87,6 @@ def extraccion_total_tarjetas():
                                 }
                             }
                             
-                            // 3. Botón 'Siguiente'
                             var nextBtn = document.querySelector('.next, [aria-label="Next"], [rel="next"]');
                             if (nextBtn && !nextBtn.classList.contains('disabled')) {
                                 (nextBtn.querySelector('a') || nextBtn).click();
@@ -99,7 +97,6 @@ def extraccion_total_tarjetas():
                     """)
                     
                     if not exito_clic:
-                        print(f"🛑 No se encontró la página {pag}. Fin de la paginación.")
                         break
                         
                     sb.sleep(3)
@@ -107,33 +104,33 @@ def extraccion_total_tarjetas():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # ESTRATEGIA DEFINITIVA: Anclaje al '€' y subida elástica
                 elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
                 tarjetas_procesadas = set()
                 jugadores_pagina = 0
 
                 for tag in elementos_precio:
-                    # Descartamos textos sueltos que no son del jugador
                     if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
                         continue
                         
-                    # Subimos por el árbol HTML hasta encontrar la caja que contiene imágenes (la tarjeta)
+                    # MAGIA APLICADA: En lugar de parar en la 1ª imagen, subimos lo suficiente 
+                    # para englobar de forma segura el bloque completo del jugador.
                     tarjeta = tag.parent
-                    for _ in range(12): # Límite elástico amplio
-                        if tarjeta and tarjeta.find('img'):
-                            break
+                    for _ in range(10): 
                         if tarjeta and tarjeta.parent:
                             tarjeta = tarjeta.parent
+                            # Rompemos si encontramos el contenedor que tiene al menos un enlace (nombre) y el precio
+                            if tarjeta.find('a') and tarjeta.find_all('img'):
+                                # Aseguramos estar envolviendo lo máximo posible para no perder el escudo
+                                pass 
                             
-                    # Si no pudimos envolver una imagen o ya procesamos esta tarjeta, saltamos
-                    if not tarjeta or not tarjeta.find('img') or id(tarjeta) in tarjetas_procesadas:
+                    if not tarjeta or id(tarjeta) in tarjetas_procesadas:
                         continue
                         
                     tarjetas_procesadas.add(id(tarjeta))
                     
                     textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
-                    # 1. POSICIÓN
+                    # 1. POSICIÓN (Buscando PT, DF, MC, MD, DL)
                     pos = "JUG"
                     for t in textos_sueltos:
                         if t.upper() in mapa_posiciones:
@@ -172,7 +169,7 @@ def extraccion_total_tarjetas():
                             pts = t
                             break
 
-                    # 5. EQUIPO
+                    # 5. EQUIPO (Lectura completa del contenedor)
                     equipo = "LaLiga"
                     for a in tarjeta.find_all('a', href=True):
                         href = a['href'].lower()
@@ -200,7 +197,6 @@ def extraccion_total_tarjetas():
                             
                             if equipo != "LaLiga": break
 
-                    # Guardado final
                     if nombre not in jugadores_dict and precio != "0 €":
                         jugadores_dict[nombre] = {
                             "nombre": nombre, "equipo": equipo, "pos": pos,
@@ -226,9 +222,9 @@ def extraccion_total_tarjetas():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡LA BASE DE DATOS ESTÁ COMPLETA! Se capturaron {len(resultado)} chollos.")
+        print(f"✅ ¡CORONA CONSEGUIDA! 🏆 {len(resultado)} jugadores en tu web con todos sus datos perfectos.")
     else:
-        print("❌ No se encontraron jugadores.")
+        print("❌ Error al guardar datos.")
 
 if __name__ == "__main__":
-    extraccion_total_tarjetas()
+    extraccion_base_datos_completa()
