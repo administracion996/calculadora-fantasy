@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_definitiva_chollos():
-    print("🤖 Iniciando asalto (Radar de Euro € + Aislamiento Inteligente de Tarjetas)...")
+def extraccion_quirurgica():
+    print("🤖 Iniciando asalto (Aislamiento Quirúrgico por Límite de Precios)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -111,25 +111,25 @@ def extraccion_definitiva_chollos():
                     if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
                         continue
                         
-                    # LA MAGIA: Buscar el contenedor más grande que NO sea la página entera
                     nodo = tag.parent
                     mejor_tarjeta = None
                     
-                    for _ in range(7): # Subimos 7 niveles analizando
-                        if nodo:
-                            num_imagenes = len(nodo.find_all('img'))
-                            tiene_enlace = nodo.find('a') is not None
-                            
-                            # Una tarjeta de jugador normal tiene entre 1 y 6 imágenes. 
-                            # Si tiene más de 10, hemos agarrado la cuadrícula entera de jugadores.
-                            if 0 < num_imagenes <= 8 and tiene_enlace:
-                                mejor_tarjeta = nodo
-                                
-                            if nodo.parent:
-                                nodo = nodo.parent
-                        else:
+                    # MAGIA: Subir por el código de forma segura
+                    while nodo and nodo.name not in ['body', 'html']:
+                        textos_nodo = list(nodo.stripped_strings)
+                        euros_en_nodo = [t for t in textos_nodo if '€' in t and "RANGO" not in t.upper() and "PRECIO" not in t.upper()]
+                        
+                        # Si encontramos más de 4 precios, significa que hemos atrapado a varios jugadores a la vez. ¡Frenamos!
+                        if len(euros_en_nodo) > 4:
                             break
                             
+                        # Si tiene foto y enlace, nos sirve como tarjeta válida
+                        if nodo.find('img') and nodo.find('a'):
+                            mejor_tarjeta = nodo
+                            
+                        nodo = nodo.parent
+                        
+                    # Si no encontramos tarjeta válida o ya la leímos, pasamos
                     if not mejor_tarjeta or id(mejor_tarjeta) in tarjetas_procesadas:
                         continue
                         
@@ -137,7 +137,7 @@ def extraccion_definitiva_chollos():
                     tarjeta = mejor_tarjeta
                     textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
-                    # 1. POSICIÓN (Si no la tiene, se queda como JUG)
+                    # 1. POSICIÓN
                     pos = "JUG"
                     for t in textos_sueltos:
                         if t.upper() in mapa_posiciones:
@@ -182,7 +182,6 @@ def extraccion_definitiva_chollos():
                     # 5. EQUIPO
                     equipo = "LaLiga"
                     
-                    # A) Miramos en los enlaces
                     for a in tarjeta.find_all('a', href=True):
                         href = a['href'].lower()
                         if '/equipo/' in href:
@@ -193,7 +192,6 @@ def extraccion_definitiva_chollos():
                                     break
                         if equipo != "LaLiga": break
 
-                    # B) Miramos en los escudos
                     if equipo == "LaLiga":
                         for img in tarjeta.find_all('img'):
                             src = img.get('src', '').lower()
@@ -235,9 +233,9 @@ def extraccion_definitiva_chollos():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡AHORA SÍ, PRECISIÓN REAL! {len(resultado)} chollos capturados con equipo y posición.")
+        print(f"✅ ¡CORONA RECUPERADA! {len(resultado)} chollos (con equipo, posición y nombre).")
     else:
-        print("❌ El robot no ha cazado a nadie. Algo bloquea la lectura.")
+        print("❌ El robot no ha cazado a nadie.")
 
 if __name__ == "__main__":
-    extraccion_definitiva_chollos()
+    extraccion_quirurgica()
