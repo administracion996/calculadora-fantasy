@@ -3,10 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-def extraccion_api_directa():
+def extraccion_api_definitiva():
     print("⚡ Conectando a la API de Comuniate mediante sesión HTTP...")
     
-    # Creamos una sesión para guardar cookies automáticas (el pasaporte de seguridad)
     session = requests.Session()
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -16,12 +15,11 @@ def extraccion_api_directa():
         "Referer": "https://www.comuniate.com/jugadores/comunio"
     })
 
-    # 1. Primer contacto: Entramos a la web para recoger cookies de sesión
     try:
         print("🔑 Obteniendo credenciales de sesión...")
         session.get("https://www.comuniate.com/jugadores/comunio", timeout=10)
     except Exception as e:
-        print(f"❌ Error al conectar con la web principal: {e}")
+        print(f"❌ Error al conectar: {e}")
         return
 
     jugadores_dict = {}
@@ -44,21 +42,20 @@ def extraccion_api_directa():
         "palmas": "UD Las Palmas", "valencia": "Valencia CF", "villarreal": "Villarreal CF"
     }
 
-    # Endpoint exacto de la API AJAX
     url_endpoint = "https://www.comuniate.com/ajax/jugadores/relevo_jugadores.php"
 
     for pag in range(1, 25):
-        # Payload con los parámetros de consulta
+        # AQUÍ ESTÁ EL TRUCO: 'pagina' es el nombre real en PHP español
         payload = {
-            "page": pag,
+            "pagina": pag,
             "pag": pag,
+            "page": pag,
             "posicion": "todas",
             "orden": "puntos",
-            "grupo": "0"
+            "equipo": "0"
         }
 
         try:
-            # Petición POST a la API
             res = session.post(url_endpoint, data=payload, timeout=10)
             
             if res.status_code != 200 or not res.text.strip():
@@ -156,13 +153,14 @@ def extraccion_api_directa():
                     jugadores_pagina += 1
 
             print(f"   -> API Página {pag}: {jugadores_pagina} jugadores extraídos.")
-            if jugadores_pagina == 0 and pag > 5:
+            
+            if jugadores_pagina == 0 and pag > 1:
                 break
                 
             time.sleep(0.3)
 
         except Exception as e:
-            print(f"❌ Error consultando la página {pag}: {e}")
+            print(f"❌ Error en página {pag}: {e}")
             break
 
     def obtener_valor(precio_str):
@@ -175,9 +173,9 @@ def extraccion_api_directa():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"🚀 API COMPLETADA: {len(resultado)} jugadores en el archivo JSON.")
+        print(f"🏆 API COMPLETADA: {len(resultado)} jugadores en datos.json.")
     else:
-        print("⚠️ La API rebotó la conexión.")
+        print("❌ La API rebotó la conexión.")
 
 if __name__ == "__main__":
-    extraccion_api_directa()
+    extraccion_api_definitiva()
