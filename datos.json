@@ -1,10 +1,214 @@
 {
     "laliga": {
         "chollos": [
-            {"nombre": "Lamine Yamal", "equipo": "FC Barcelona", "pos": "DEL", "precio": "110.500.000 €", "subida": "+ 2.250.000 €", "pts": "8.8"},
-            {"nombre": "Kylian Mbappé", "equipo": "Real Madrid", "pos": "DEL", "precio": "122.500.000 €", "subida": "+ 3.400.000 €", "pts": "9.4"},
-            {"nombre": "Raphinha", "equipo": "FC Barcelona", "pos": "DEL", "precio": "99.000.000 €", "subida": "+ 2.600.000 €", "pts": "9.1"},
-            {"nombre": "Pedri", "equipo": "FC Barcelona", "pos": "MED", "precio": "77.000.000 €", "subida": "+ 1.050.000 €", "pts": "7.9"}
+            {
+                "nombre": "Muriqi",
+                "equipo": "RCD Mallorca",
+                "pos": "DEL",
+                "precio": "98.001.695 €",
+                "subida": "0 €",
+                "pts": "234"
+            },
+            {
+                "nombre": "Ounahi",
+                "equipo": "Girona FC",
+                "pos": "MED",
+                "precio": "19.344.403 €",
+                "subida": "0 €",
+                "pts": "179"
+            },
+            {
+                "nombre": "Sergi Darder",
+                "equipo": "RCD Mallorca",
+                "pos": "MED",
+                "precio": "15.207.632 €",
+                "subida": "0 €",
+                "pts": "200"
+            },
+            {
+                "nombre": "Aarón Escandell",
+                "equipo": "LaLiga",
+                "pos": "POR",
+                "precio": "9.531.645 €",
+                "subida": "0 €",
+                "pts": "256"
+            },
+            {
+                "nombre": "Vitor Reis",
+                "equipo": "Girona FC",
+                "pos": "DEF",
+                "precio": "7.683.753 €",
+                "subida": "0 €",
+                "pts": "179"
+            },
+            {
+                "nombre": "Tsygankov",
+                "equipo": "Girona FC",
+                "pos": "DEL",
+                "precio": "5.229.210 €",
+                "subida": "0 €",
+                "pts": "188"
+            },
+            {
+                "nombre": "Pablo Torre",
+                "equipo": "RCD Mallorca",
+                "pos": "MED",
+                "precio": "4.821.107 €",
+                "subida": "0 €",
+                "pts": "146"
+            },
+            {
+                "nombre": "Blind",
+                "equipo": "Girona FC",
+                "pos": "DEF",
+                "precio": "3.179.787 €",
+                "subida": "0 €",
+                "pts": "146"
+            },
+            {
+                "nombre": "Jan Virgili",
+                "equipo": "RCD Mallorca",
+                "pos": "DEL",
+                "precio": "2.973.074 €",
+                "subida": "0 €",
+                "pts": "141"
+            },
+            {
+                "nombre": "Witsel",
+                "equipo": "Girona FC",
+                "pos": "MED",
+                "precio": "2.914.277 €",
+                "subida": "0 €",
+                "pts": "148"
+            },
+            {
+                "nombre": "Arnau Martínez",
+                "equipo": "Girona FC",
+                "pos": "DEF",
+                "precio": "2.163.924 €",
+                "subida": "0 €",
+                "pts": "190"
+            },
+            {
+                "nombre": "Johan Mojica",
+                "equipo": "RCD Mallorca",
+                "pos": "DEF",
+                "precio": "2.163.431 €",
+                "subida": "0 €",
+                "pts": "130"
+            },
+            {
+                "nombre": "Samu Costa",
+                "equipo": "RCD Mallorca",
+                "pos": "MED",
+                "precio": "2.105.269 €",
+                "subida": "0 €",
+                "pts": "165"
+            },
+            {
+                "nombre": "Martin Valjent",
+                "equipo": "RCD Mallorca",
+                "pos": "DEF",
+                "precio": "1.891.976 €",
+                "subida": "0 €",
+                "pts": "154"
+            },
+            {
+                "nombre": "Gazzaniga",
+                "equipo": "Girona FC",
+                "pos": "POR",
+                "precio": "1.886.210 €",
+                "subida": "0 €",
+                "pts": "201"
+            },
+            {
+                "nombre": "Leo Román",
+                "equipo": "LaLiga",
+                "pos": "POR",
+                "precio": "1.868.422 €",
+                "subida": "0 €",
+                "pts": "165"
+            },
+            {
+                "nombre": "Vanat",
+                "equipo": "Girona FC",
+                "pos": "DEL",
+                "precio": "1.851.022 €",
+                "subida": "0 €",
+                "pts": "130"
+            },
+            {
+                "nombre": "Iván Martín",
+                "equipo": "Girona FC",
+                "pos": "MED",
+                "precio": "1.797.921 €",
+                "subida": "0 €",
+                "pts": "148"
+            },
+            {
+                "nombre": "Álex Moreno",
+                "equipo": "Girona FC",
+                "pos": "DEF",
+                "precio": "1.765.014 €",
+                "subida": "0 €",
+                "pts": "120"
+            },
+            {
+                "nombre": "Maffeo",
+                "equipo": "RCD Mallorca",
+                "pos": "DEF",
+                "precio": "1.747.964 €",
+                "subida": "0 €",
+                "pts": "134"
+            },
+            {
+                "nombre": "Omar Mascarell",
+                "equipo": "RCD Mallorca",
+                "pos": "MED",
+                "precio": "1.727.892 €",
+                "subida": "0 €",
+                "pts": "138"
+            },
+            {
+                "nombre": "Fede Viñas",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "1.725.991 €",
+                "subida": "0 €",
+                "pts": "167"
+            },
+            {
+                "nombre": "Morlanes",
+                "equipo": "RCD Mallorca",
+                "pos": "MED",
+                "precio": "1.712.616 €",
+                "subida": "0 €",
+                "pts": "122"
+            },
+            {
+                "nombre": "Alberto Reina",
+                "equipo": "LaLiga",
+                "pos": "MED",
+                "precio": "1.697.919 €",
+                "subida": "0 €",
+                "pts": "158"
+            },
+            {
+                "nombre": "Ilyas Chaira",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "1.676.544 €",
+                "subida": "0 €",
+                "pts": "162"
+            },
+            {
+                "nombre": "Hassan",
+                "equipo": "LaLiga",
+                "pos": "MED",
+                "precio": "1.665.348 €",
+                "subida": "0 €",
+                "pts": "125"
+            }
         ]
     }
 }
