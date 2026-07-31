@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_quirurgica():
-    print("🤖 Iniciando asalto (Aislamiento Quirúrgico por Límite de Precios)...")
+def extraccion_por_foto():
+    print("🤖 Iniciando asalto (Estrategia Infalible: Anclaje desde la Foto del Jugador)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -103,38 +103,31 @@ def extraccion_quirurgica():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
+                # ESTRATEGIA NUEVA: Buscamos todas las imágenes de la página
+                todas_las_imagenes = soup.find_all('img')
                 tarjetas_procesadas = set()
                 jugadores_pagina = 0
 
-                for tag in elementos_precio:
-                    if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
-                        continue
-                        
-                    nodo = tag.parent
-                    mejor_tarjeta = None
+                for img in todas_las_imagenes:
+                    tarjeta = img.parent
+                    es_tarjeta_valida = False
                     
-                    # MAGIA: Subir por el código de forma segura
-                    while nodo and nodo.name not in ['body', 'html']:
-                        textos_nodo = list(nodo.stripped_strings)
-                        euros_en_nodo = [t for t in textos_nodo if '€' in t and "RANGO" not in t.upper() and "PRECIO" not in t.upper()]
-                        
-                        # Si encontramos más de 4 precios, significa que hemos atrapado a varios jugadores a la vez. ¡Frenamos!
-                        if len(euros_en_nodo) > 4:
-                            break
+                    # Subimos buscando que esa caja contenga un euro '€'.
+                    # Máximo 8 saltos para no comernos la página web entera.
+                    for _ in range(8):
+                        if tarjeta and '€' in tarjeta.get_text():
+                            # Filtro de seguridad: Si la caja tiene más de 12 imágenes, es la tabla entera, no nos vale.
+                            if len(tarjeta.find_all('img')) <= 12:
+                                es_tarjeta_valida = True
+                                break
+                        if tarjeta:
+                            tarjeta = tarjeta.parent
                             
-                        # Si tiene foto y enlace, nos sirve como tarjeta válida
-                        if nodo.find('img') and nodo.find('a'):
-                            mejor_tarjeta = nodo
-                            
-                        nodo = nodo.parent
-                        
-                    # Si no encontramos tarjeta válida o ya la leímos, pasamos
-                    if not mejor_tarjeta or id(mejor_tarjeta) in tarjetas_procesadas:
+                    if not es_tarjeta_valida or id(tarjeta) in tarjetas_procesadas:
                         continue
                         
-                    tarjetas_procesadas.add(id(mejor_tarjeta))
-                    tarjeta = mejor_tarjeta
+                    tarjetas_procesadas.add(id(tarjeta))
+                    
                     textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
                     # 1. POSICIÓN
@@ -193,10 +186,10 @@ def extraccion_quirurgica():
                         if equipo != "LaLiga": break
 
                     if equipo == "LaLiga":
-                        for img in tarjeta.find_all('img'):
-                            src = img.get('src', '').lower()
-                            alt = img.get('alt', '').strip().lower()
-                            title = img.get('title', '').strip().lower()
+                        for i_tag in tarjeta.find_all('img'):
+                            src = i_tag.get('src', '').lower()
+                            alt = i_tag.get('alt', '').strip().lower()
+                            title = i_tag.get('title', '').strip().lower()
                             
                             if nombre.lower() in alt or "avatar" in src or "jugador" in src:
                                 continue
@@ -233,9 +226,9 @@ def extraccion_quirurgica():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡CORONA RECUPERADA! {len(resultado)} chollos (con equipo, posición y nombre).")
+        print(f"✅ ¡RÉCORD TOTAL! {len(resultado)} chollos capturados.")
     else:
-        print("❌ El robot no ha cazado a nadie.")
+        print("❌ Sigue dando 0. Algo va muy mal.")
 
 if __name__ == "__main__":
-    extraccion_quirurgica()
+    extraccion_por_foto()
