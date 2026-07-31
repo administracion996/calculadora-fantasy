@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_magica():
-    print("🤖 Iniciando asalto (Radar de Precio + Cazador de Escudos)...")
+def extraccion_definitiva_chollos():
+    print("🤖 Iniciando asalto (Radar de Euro € + Aislamiento Inteligente de Tarjetas)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -103,7 +103,6 @@ def extraccion_magica():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # VOLVEMOS AL RADAR DEL PRECIO (Así no se escapa nadie)
                 elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
                 tarjetas_procesadas = set()
                 jugadores_pagina = 0
@@ -112,43 +111,42 @@ def extraccion_magica():
                     if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
                         continue
                         
-                    # MAGIA: Subimos por el código hasta atrapar la fila entera (<tr>) o un contenedor grande
-                    padre = tag.parent
-                    for _ in range(8): 
-                        if padre and padre.name == 'tr':
-                            break # ¡Atrapado en su fila de tabla!
-                        if padre and padre.parent:
-                            padre = padre.parent
+                    # LA MAGIA: Buscar el contenedor más grande que NO sea la página entera
+                    nodo = tag.parent
+                    mejor_tarjeta = None
+                    
+                    for _ in range(7): # Subimos 7 niveles analizando
+                        if nodo:
+                            num_imagenes = len(nodo.find_all('img'))
+                            tiene_enlace = nodo.find('a') is not None
                             
-                    if not padre or id(padre) in tarjetas_procesadas:
+                            # Una tarjeta de jugador normal tiene entre 1 y 6 imágenes. 
+                            # Si tiene más de 10, hemos agarrado la cuadrícula entera de jugadores.
+                            if 0 < num_imagenes <= 8 and tiene_enlace:
+                                mejor_tarjeta = nodo
+                                
+                            if nodo.parent:
+                                nodo = nodo.parent
+                        else:
+                            break
+                            
+                    if not mejor_tarjeta or id(mejor_tarjeta) in tarjetas_procesadas:
                         continue
                         
-                    tarjetas_procesadas.add(id(padre))
+                    tarjetas_procesadas.add(id(mejor_tarjeta))
+                    tarjeta = mejor_tarjeta
+                    textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
-                    textos_sueltos = [t.strip() for t in padre.stripped_strings if t.strip()]
-                    
-                    # 1. PRECIO
-                    precio = "0 €"
-                    for i, t in enumerate(textos_sueltos):
-                        if '€' in t:
-                            prev_t = textos_sueltos[i-1].upper() if i > 0 else ""
-                            if "IDEAL" not in prev_t and "MÁX" not in prev_t and "IDEAL" not in t.upper() and "MÁX" not in t.upper():
-                                precio = t.replace('€', '').strip() + " €"
-                                break
-                                
-                    if precio == "0 €":
-                        continue
-
-                    # 2. POSICIÓN
+                    # 1. POSICIÓN (Si no la tiene, se queda como JUG)
                     pos = "JUG"
                     for t in textos_sueltos:
                         if t.upper() in mapa_posiciones:
                             pos = mapa_posiciones[t.upper()]
                             break
                             
-                    # 3. NOMBRE
+                    # 2. NOMBRE
                     nombre = ""
-                    for a in padre.find_all('a'):
+                    for a in tarjeta.find_all('a'):
                         href = a.get('href', '').lower()
                         if '/equipo/' not in href and len(a.get_text(strip=True)) > 2:
                             nombre = a.get_text(strip=True)
@@ -164,6 +162,15 @@ def extraccion_magica():
                     if not nombre:
                         continue
 
+                    # 3. PRECIO
+                    precio = "0 €"
+                    for i, t in enumerate(textos_sueltos):
+                        if '€' in t:
+                            prev_t = textos_sueltos[i-1].upper() if i > 0 else ""
+                            if "IDEAL" not in prev_t and "MÁX" not in prev_t and "IDEAL" not in t.upper() and "MÁX" not in t.upper():
+                                precio = t.replace('€', '').strip() + " €"
+                                break
+
                     # 4. PUNTOS
                     pts = "0.0"
                     for t in textos_sueltos:
@@ -172,9 +179,11 @@ def extraccion_magica():
                             pts = t
                             break
 
-                    # 5. EQUIPO (Buscando en la fila completa)
+                    # 5. EQUIPO
                     equipo = "LaLiga"
-                    for a in padre.find_all('a', href=True):
+                    
+                    # A) Miramos en los enlaces
+                    for a in tarjeta.find_all('a', href=True):
                         href = a['href'].lower()
                         if '/equipo/' in href:
                             slug = href.split('/equipo/')[-1].split('/')[0]
@@ -184,8 +193,9 @@ def extraccion_magica():
                                     break
                         if equipo != "LaLiga": break
 
+                    # B) Miramos en los escudos
                     if equipo == "LaLiga":
-                        for img in padre.find_all('img'):
+                        for img in tarjeta.find_all('img'):
                             src = img.get('src', '').lower()
                             alt = img.get('alt', '').strip().lower()
                             title = img.get('title', '').strip().lower()
@@ -225,9 +235,9 @@ def extraccion_magica():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡MÁXIMA PRECISIÓN! {len(resultado)} chollos (recuperados los perdidos).")
+        print(f"✅ ¡AHORA SÍ, PRECISIÓN REAL! {len(resultado)} chollos capturados con equipo y posición.")
     else:
-        print("❌ Error crítico: no se encontró a nadie.")
+        print("❌ El robot no ha cazado a nadie. Algo bloquea la lectura.")
 
 if __name__ == "__main__":
-    extraccion_magica()
+    extraccion_definitiva_chollos()
