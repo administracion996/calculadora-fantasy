@@ -2,11 +2,10 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_base_datos_completa():
-    print("🤖 Iniciando asalto total (Capturando el 100% del mercado)...")
+def extraccion_tarjetas_perfectas():
+    print("🤖 Iniciando asalto total (Escáner de anclaje inteligente)...")
     jugadores_dict = {}
 
-    # He añadido tu 'MD' al mapa de posiciones para que no se escape ninguno
     mapa_posiciones = {
         'PT': 'POR', 'POR': 'POR',
         'DF': 'DEF', 'DEF': 'DEF',
@@ -112,16 +111,20 @@ def extraccion_base_datos_completa():
                     if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
                         continue
                         
-                    # MAGIA APLICADA: En lugar de parar en la 1ª imagen, subimos lo suficiente 
-                    # para englobar de forma segura el bloque completo del jugador.
+                    # SUBIDA INTELIGENTE: Subimos nivel a nivel hasta englobar Imagen + Enlace + Posición
                     tarjeta = tag.parent
-                    for _ in range(10): 
+                    for _ in range(8): # Límite máximo para no subir a la página entera
                         if tarjeta and tarjeta.parent:
                             tarjeta = tarjeta.parent
-                            # Rompemos si encontramos el contenedor que tiene al menos un enlace (nombre) y el precio
-                            if tarjeta.find('a') and tarjeta.find_all('img'):
-                                # Aseguramos estar envolviendo lo máximo posible para no perder el escudo
-                                pass 
+                            
+                            # Comprobamos si esta 'caja' ya tiene todo lo que define a un jugador
+                            textos_verificar = [t.strip().upper() for t in tarjeta.stripped_strings]
+                            tiene_pos = any(p in textos_verificar for p in mapa_posiciones.keys())
+                            tiene_imagen = len(tarjeta.find_all('img')) >= 1
+                            tiene_enlace = tarjeta.find('a') is not None
+                            
+                            if tiene_pos and tiene_imagen and tiene_enlace:
+                                break # ¡Lo encerramos! Aquí rompemos el bucle limpiamente
                             
                     if not tarjeta or id(tarjeta) in tarjetas_procesadas:
                         continue
@@ -130,7 +133,7 @@ def extraccion_base_datos_completa():
                     
                     textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
                     
-                    # 1. POSICIÓN (Buscando PT, DF, MC, MD, DL)
+                    # 1. POSICIÓN
                     pos = "JUG"
                     for t in textos_sueltos:
                         if t.upper() in mapa_posiciones:
@@ -169,7 +172,7 @@ def extraccion_base_datos_completa():
                             pts = t
                             break
 
-                    # 5. EQUIPO (Lectura completa del contenedor)
+                    # 5. EQUIPO
                     equipo = "LaLiga"
                     for a in tarjeta.find_all('a', href=True):
                         href = a['href'].lower()
@@ -222,9 +225,9 @@ def extraccion_base_datos_completa():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡CORONA CONSEGUIDA! 🏆 {len(resultado)} jugadores en tu web con todos sus datos perfectos.")
+        print(f"✅ ¡CORONA CONSEGUIDA! 🏆 {len(resultado)} jugadores con todos sus datos perfectos.")
     else:
-        print("❌ Error al guardar datos.")
+        print("❌ Error: No se guardaron jugadores.")
 
 if __name__ == "__main__":
-    extraccion_base_datos_completa()
+    extraccion_tarjetas_perfectas()
