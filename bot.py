@@ -2,8 +2,8 @@ import json
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 
-def extraccion_tarjetas_perfectas():
-    print("🤖 Iniciando asalto total (Escáner de anclaje inteligente)...")
+def extraccion_magica():
+    print("🤖 Iniciando asalto (Anclaje Perfecto + Visión de Vecindario)...")
     jugadores_dict = {}
 
     mapa_posiciones = {
@@ -103,109 +103,115 @@ def extraccion_tarjetas_perfectas():
                 html = sb.get_page_source()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                elementos_precio = soup.find_all(string=lambda t: t and '€' in t)
+                etiquetas_posicion = soup.find_all(['span', 'div', 'b', 'strong', 'p'])
                 tarjetas_procesadas = set()
                 jugadores_pagina = 0
 
-                for tag in elementos_precio:
-                    if "RANGO" in tag.upper() or "PRECIO" in tag.upper():
-                        continue
-                        
-                    # SUBIDA INTELIGENTE: Subimos nivel a nivel hasta englobar Imagen + Enlace + Posición
-                    tarjeta = tag.parent
-                    for _ in range(8): # Límite máximo para no subir a la página entera
-                        if tarjeta and tarjeta.parent:
-                            tarjeta = tarjeta.parent
-                            
-                            # Comprobamos si esta 'caja' ya tiene todo lo que define a un jugador
-                            textos_verificar = [t.strip().upper() for t in tarjeta.stripped_strings]
-                            tiene_pos = any(p in textos_verificar for p in mapa_posiciones.keys())
-                            tiene_imagen = len(tarjeta.find_all('img')) >= 1
-                            tiene_enlace = tarjeta.find('a') is not None
-                            
-                            if tiene_pos and tiene_imagen and tiene_enlace:
-                                break # ¡Lo encerramos! Aquí rompemos el bucle limpiamente
-                            
-                    if not tarjeta or id(tarjeta) in tarjetas_procesadas:
-                        continue
-                        
-                    tarjetas_procesadas.add(id(tarjeta))
+                for tag in etiquetas_posicion:
+                    texto_tag = tag.get_text(strip=True).upper()
                     
-                    textos_sueltos = [t.strip() for t in tarjeta.stripped_strings if t.strip()]
-                    
-                    # 1. POSICIÓN
-                    pos = "JUG"
-                    for t in textos_sueltos:
-                        if t.upper() in mapa_posiciones:
-                            pos = mapa_posiciones[t.upper()]
-                            break
-                            
-                    # 2. NOMBRE
-                    nombre = ""
-                    a_tag = tarjeta.find('a')
-                    if a_tag and len(a_tag.get_text(strip=True)) > 2:
-                        nombre = a_tag.get_text(strip=True)
-                    else:
-                        for t in textos_sueltos:
-                            if len(t) > 2 and not any(c.isdigit() for c in t) and '€' not in t and t.upper() not in mapa_posiciones:
-                                if t.upper() not in ["IDEAL:", "MÁX.:", "IDEAL", "MÁX", "VALOR", "PUNTOS", "EQUIPO"]:
-                                    nombre = t
-                                    break
-                                    
-                    if not nombre:
-                        continue
+                    if texto_tag in mapa_posiciones:
+                        padre = tag.parent
+                        es_tarjeta = False
+                        
+                        # VOLVEMOS AL SISTEMA DE LOS 428 JUGADORES (6 niveles estrictos)
+                        for _ in range(6): 
+                            if padre and '€' in padre.get_text():
+                                es_tarjeta = True
+                                break
+                            if padre:
+                                padre = padre.parent
+                        
+                        if not es_tarjeta or not padre or id(padre) in tarjetas_procesadas:
+                            continue
+                        
+                        tarjetas_procesadas.add(id(padre))
+                        pos = mapa_posiciones[texto_tag]
+                        
+                        textos_sueltos = [t.strip() for t in padre.stripped_strings if t.strip()]
+                        
+                        # 1. NOMBRE (Evitando enlaces de equipos)
+                        nombre = ""
+                        for a in padre.find_all('a'):
+                            href = a.get('href', '').lower()
+                            if '/equipo/' not in href and len(a.get_text(strip=True)) > 2:
+                                nombre = a.get_text(strip=True)
+                                break
+                        
+                        if not nombre:
+                            for t in textos_sueltos:
+                                if len(t) > 2 and not any(c.isdigit() for c in t) and '€' not in t and t.upper() not in mapa_posiciones:
+                                    if t.upper() not in ["IDEAL:", "MÁX.:", "IDEAL", "MÁX", "VALOR", "PUNTOS", "EQUIPO"]:
+                                        nombre = t
+                                        break
+                                        
+                        if not nombre:
+                            continue
 
-                    # 3. PRECIO
-                    precio = "0 €"
-                    for i, t in enumerate(textos_sueltos):
-                        if '€' in t:
-                            prev_t = textos_sueltos[i-1].upper() if i > 0 else ""
-                            if "IDEAL" not in prev_t and "MÁX" not in prev_t and "IDEAL" not in t.upper() and "MÁX" not in t.upper():
-                                precio = t.replace('€', '').strip() + " €"
+                        # 2. PRECIO
+                        precio = "0 €"
+                        for i, t in enumerate(textos_sueltos):
+                            if '€' in t:
+                                prev_t = textos_sueltos[i-1].upper() if i > 0 else ""
+                                if "IDEAL" not in prev_t and "MÁX" not in prev_t and "IDEAL" not in t.upper() and "MÁX" not in t.upper():
+                                    precio = t.replace('€', '').strip() + " €"
+                                    break
+
+                        # 3. PUNTOS
+                        pts = "0.0"
+                        for t in textos_sueltos:
+                            t_clean = t.replace('.', '').replace(',', '')
+                            if t_clean.isdigit() and len(t_clean) <= 4 and t != precio.replace(' €', '') and t.upper() not in mapa_posiciones:
+                                pts = t
                                 break
 
-                    # 4. PUNTOS
-                    pts = "0.0"
-                    for t in textos_sueltos:
-                        t_clean = t.replace('.', '').replace(',', '')
-                        if t_clean.isdigit() and len(t_clean) <= 4 and t != precio.replace(' €', ''):
-                            pts = t
-                            break
+                        # 4. EQUIPO (Búsqueda en el VECINDARIO EXTERIOR)
+                        equipo = "LaLiga"
+                        # Ampliamos la vista 2 niveles hacia fuera SOLO para buscar el equipo, sin romper la tarjeta original
+                        vecindario = padre
+                        if vecindario.parent: vecindario = vecindario.parent
+                        if vecindario.parent: vecindario = vecindario.parent
+                        
+                        # Si descubrimos que estamos dentro de una tabla (TR), usamos la fila entera como vecindario
+                        if padre.parent and padre.parent.name == 'tr':
+                            vecindario = padre.parent
+                        elif padre.parent and padre.parent.parent and padre.parent.parent.name == 'tr':
+                            vecindario = padre.parent.parent
 
-                    # 5. EQUIPO
-                    equipo = "LaLiga"
-                    for a in tarjeta.find_all('a', href=True):
-                        href = a['href'].lower()
-                        if '/equipo/' in href:
-                            slug = href.split('/equipo/')[-1].split('/')[0]
-                            for clave, nombre_real in mapa_equipos.items():
-                                if clave in slug:
-                                    equipo = nombre_real
-                                    break
-                        if equipo != "LaLiga": break
-
-                    if equipo == "LaLiga":
-                        for img in tarjeta.find_all('img'):
-                            src = img.get('src', '').lower()
-                            alt = img.get('alt', '').strip().lower()
-                            title = img.get('title', '').strip().lower()
-                            
-                            if nombre.lower() in alt or "avatar" in src or "jugador" in src:
-                                continue
-                                
-                            for clave, nombre_real in mapa_equipos.items():
-                                if clave in src or clave in alt or clave in title:
-                                    equipo = nombre_real
-                                    break
-                            
+                        # Buscamos en enlaces del vecindario
+                        for a in vecindario.find_all('a', href=True):
+                            href = a['href'].lower()
+                            if '/equipo/' in href:
+                                slug = href.split('/equipo/')[-1].split('/')[0]
+                                for clave, nombre_real in mapa_equipos.items():
+                                    if clave in slug:
+                                        equipo = nombre_real
+                                        break
                             if equipo != "LaLiga": break
 
-                    if nombre not in jugadores_dict and precio != "0 €":
-                        jugadores_dict[nombre] = {
-                            "nombre": nombre, "equipo": equipo, "pos": pos,
-                            "precio": precio, "subida": "0 €", "pts": pts
-                        }
-                        jugadores_pagina += 1
+                        # Buscamos en imágenes del vecindario
+                        if equipo == "LaLiga":
+                            for img in vecindario.find_all('img'):
+                                src = img.get('src', '').lower()
+                                alt = img.get('alt', '').strip().lower()
+                                title = img.get('title', '').strip().lower()
+                                
+                                if nombre.lower() in alt or "avatar" in src or "jugador" in src:
+                                    continue
+                                    
+                                for clave, nombre_real in mapa_equipos.items():
+                                    if clave in src or clave in alt or clave in title:
+                                        equipo = nombre_real
+                                        break
+                                
+                                if equipo != "LaLiga": break
+
+                        if nombre not in jugadores_dict and precio != "0 €":
+                            jugadores_dict[nombre] = {
+                                "nombre": nombre, "equipo": equipo, "pos": pos,
+                                "precio": precio, "subida": "0 €", "pts": pts
+                            }
+                            jugadores_pagina += 1
 
                 print(f"   -> ¡Capturados {jugadores_pagina} jugadores en página {pag}!")
                 
@@ -225,9 +231,9 @@ def extraccion_tarjetas_perfectas():
         base_datos = {"laliga": {"chollos": resultado}}
         with open("datos.json", "w", encoding="utf-8") as f:
             json.dump(base_datos, f, ensure_ascii=False, indent=4)
-        print(f"✅ ¡CORONA CONSEGUIDA! 🏆 {len(resultado)} jugadores con todos sus datos perfectos.")
+        print(f"✅ ¡MISIÓN COMPLETADA! {len(resultado)} jugadores con todos sus datos pulidos y guardados.")
     else:
-        print("❌ Error: No se guardaron jugadores.")
+        print("❌ Error crítico: no se encontró a nadie.")
 
 if __name__ == "__main__":
-    extraccion_tarjetas_perfectas()
+    extraccion_magica()
