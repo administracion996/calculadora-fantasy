@@ -5,7 +5,7 @@
                 "nombre": "Álex Baena",
                 "equipo": "Atlético de Madrid",
                 "pos": "MED",
-                "precio": "63.427.622 €",
+                "precio": "62.126.199 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -13,7 +13,7 @@
                 "nombre": "Alex Remiro",
                 "equipo": "Real Sociedad",
                 "pos": "POR",
-                "precio": "44.531.235 €",
+                "precio": "45.029.033 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -21,7 +21,7 @@
                 "nombre": "Catena",
                 "equipo": "CA Osasuna",
                 "pos": "DEF",
-                "precio": "37.564.798 €",
+                "precio": "37.112.026 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -29,7 +29,7 @@
                 "nombre": "David Affengruber",
                 "equipo": "LaLiga",
                 "pos": "DEF",
-                "precio": "31.377.542 €",
+                "precio": "31.937.506 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -37,7 +37,7 @@
                 "nombre": "Sorloth",
                 "equipo": "Atlético de Madrid",
                 "pos": "DEL",
-                "precio": "26.919.903 €",
+                "precio": "26.574.179 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -45,7 +45,7 @@
                 "nombre": "Alejandro Balde",
                 "equipo": "FC Barcelona",
                 "pos": "DEF",
-                "precio": "25.232.693 €",
+                "precio": "24.669.667 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -53,7 +53,7 @@
                 "nombre": "Álvaro García",
                 "equipo": "Rayo Vallecano",
                 "pos": "MED",
-                "precio": "16.757.473 €",
+                "precio": "16.888.769 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -61,7 +61,7 @@
                 "nombre": "Álvaro Carreras",
                 "equipo": "Real Madrid",
                 "pos": "DEF",
-                "precio": "15.429.615 €",
+                "precio": "15.053.370 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -69,7 +69,7 @@
                 "nombre": "Aimar Oroz",
                 "equipo": "CA Osasuna",
                 "pos": "MED",
-                "precio": "14.922.779 €",
+                "precio": "14.915.504 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -77,7 +77,7 @@
                 "nombre": "Álex Berenguer",
                 "equipo": "Athletic Club",
                 "pos": "DEL",
-                "precio": "9.848.341 €",
+                "precio": "9.697.936 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -85,7 +85,7 @@
                 "nombre": "Alfonso Herrero",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "7.208.184 €",
+                "precio": "7.183.610 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -93,7 +93,7 @@
                 "nombre": "Abdel Abqar",
                 "equipo": "Getafe CF",
                 "pos": "DEF",
-                "precio": "5.725.512 €",
+                "precio": "5.844.275 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -101,7 +101,7 @@
                 "nombre": "Álvaro Fernández",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "5.465.197 €",
+                "precio": "5.375.590 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -109,7 +109,7 @@
                 "nombre": "Adriá Altimira",
                 "equipo": "LaLiga",
                 "pos": "DEF",
-                "precio": "5.347.899 €",
+                "precio": "5.278.120 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -117,7 +117,7 @@
                 "nombre": "Abde Rebbach",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "4.486.282 €",
+                "precio": "4.405.529 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -125,7 +125,7 @@
                 "nombre": "Aitor Paredes",
                 "equipo": "Athletic Club",
                 "pos": "DEF",
-                "precio": "4.258.478 €",
+                "precio": "4.319.471 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -133,15 +133,7 @@
                 "nombre": "Alemao",
                 "equipo": "Rayo Vallecano",
                 "pos": "DEL",
-                "precio": "4.147.411 €",
-                "subida": "0 €",
-                "pts": "0"
-            },
-            {
-                "nombre": "Aitor Ruibal",
-                "equipo": "Real Betis",
-                "pos": "DEL",
-                "precio": "3.088.467 €",
+                "precio": "4.077.662 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -149,7 +141,15 @@
                 "nombre": "Álvaro Fidalgo",
                 "equipo": "Real Betis",
                 "pos": "MED",
-                "precio": "3.065.358 €",
+                "precio": "3.007.291 €",
+                "subida": "0 €",
+                "pts": "0"
+            },
+            {
+                "nombre": "Aitor Ruibal",
+                "equipo": "Real Betis",
+                "pos": "DEL",
+                "precio": "2.994.529 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -157,7 +157,7 @@
                 "nombre": "Alex Freeman",
                 "equipo": "Villarreal CF",
                 "pos": "DEF",
-                "precio": "2.846.990 €",
+                "precio": "2.805.965 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -165,7 +165,7 @@
                 "nombre": "Abel Bretones",
                 "equipo": "CA Osasuna",
                 "pos": "DEF",
-                "precio": "2.668.243 €",
+                "precio": "2.796.325 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -173,7 +173,7 @@
                 "nombre": "Aihen Muñoz",
                 "equipo": "Real Sociedad",
                 "pos": "DEF",
-                "precio": "1.745.399 €",
+                "precio": "1.702.103 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -181,7 +181,7 @@
                 "nombre": "Álex Sancris",
                 "equipo": "Getafe CF",
                 "pos": "DEL",
-                "precio": "764.332 €",
+                "precio": "747.320 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -189,7 +189,7 @@
                 "nombre": "Adama Boiro",
                 "equipo": "Athletic Club",
                 "pos": "DEF",
-                "precio": "559.440 €",
+                "precio": "551.691 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -197,7 +197,7 @@
                 "nombre": "Aitor Fernández",
                 "equipo": "CA Osasuna",
                 "pos": "POR",
-                "precio": "551.984 €",
+                "precio": "544.075 €",
                 "subida": "0 €",
                 "pts": "0"
             },
@@ -205,7 +205,7 @@
                 "nombre": "Puric",
                 "equipo": "Atlético de Madrid",
                 "pos": "DEF",
-                "precio": "457.311 €",
+                "precio": "452.579 €",
                 "subida": "0 €",
                 "pts": "0"
             }
