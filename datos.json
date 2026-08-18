@@ -2,18 +2,10 @@
     "laliga": {
         "chollos": [
             {
-                "nombre": "Alberto Moleiro",
-                "equipo": "Villarreal CF",
-                "pos": "MED",
-                "precio": "67.526.058 €",
-                "subida": "0 €",
-                "pts": "6"
-            },
-            {
                 "nombre": "Mikautadze",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "63.027.152 €",
+                "precio": "63.554.487 €",
                 "subida": "0 €",
                 "pts": "9"
             },
@@ -21,23 +13,15 @@
                 "nombre": "Nicolas Pépé",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "51.534.950 €",
+                "precio": "53.090.886 €",
                 "subida": "0 €",
                 "pts": "13"
-            },
-            {
-                "nombre": "Pape Gueye",
-                "equipo": "Villarreal CF",
-                "pos": "MED",
-                "precio": "49.427.411 €",
-                "subida": "0 €",
-                "pts": "8"
             },
             {
                 "nombre": "Dmitrovic",
                 "equipo": "RCD Espanyol",
                 "pos": "POR",
-                "precio": "37.603.510 €",
+                "precio": "38.087.702 €",
                 "subida": "0 €",
                 "pts": "11"
             },
@@ -45,79 +29,31 @@
                 "nombre": "Sivera",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "32.054.319 €",
+                "precio": "32.612.959 €",
                 "subida": "0 €",
                 "pts": "12"
             },
             {
-                "nombre": "Edu Expósito",
-                "equipo": "RCD Espanyol",
-                "pos": "MED",
-                "precio": "29.752.780 €",
-                "subida": "0 €",
-                "pts": "6"
-            },
-            {
-                "nombre": "Toni Martínez",
+                "nombre": "Aubameyang",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "25.258.309 €",
+                "precio": "31.657.424 €",
                 "subida": "0 €",
-                "pts": "8"
-            },
-            {
-                "nombre": "Íñigo Vicente",
-                "equipo": "LaLiga",
-                "pos": "DEL",
-                "precio": "19.165.047 €",
-                "subida": "0 €",
-                "pts": "6"
-            },
-            {
-                "nombre": "Andrés Martín",
-                "equipo": "LaLiga",
-                "pos": "DEL",
-                "precio": "19.118.254 €",
-                "subida": "0 €",
-                "pts": "8"
-            },
-            {
-                "nombre": "Álvaro García",
-                "equipo": "Rayo Vallecano",
-                "pos": "MED",
-                "precio": "18.708.849 €",
-                "subida": "0 €",
-                "pts": "8"
-            },
-            {
-                "nombre": "Vlachodimos",
-                "equipo": "Sevilla FC",
-                "pos": "POR",
-                "precio": "18.695.893 €",
-                "subida": "0 €",
-                "pts": "6"
+                "pts": "10"
             },
             {
                 "nombre": "Nahuel Tenaglia",
                 "equipo": "LaLiga",
                 "pos": "DEF",
-                "precio": "15.020.464 €",
+                "precio": "15.621.725 €",
                 "subida": "0 €",
                 "pts": "17"
-            },
-            {
-                "nombre": "Omar El Hilali",
-                "equipo": "RCD Espanyol",
-                "pos": "DEF",
-                "precio": "9.072.659 €",
-                "subida": "0 €",
-                "pts": "8"
             },
             {
                 "nombre": "Roberto Fernández",
                 "equipo": "RCD Espanyol",
                 "pos": "DEL",
-                "precio": "7.314.548 €",
+                "precio": "7.825.372 €",
                 "subida": "0 €",
                 "pts": "16"
             },
@@ -125,63 +61,39 @@
                 "nombre": "Tyrhys Dolan",
                 "equipo": "RCD Espanyol",
                 "pos": "DEL",
-                "precio": "5.997.765 €",
+                "precio": "6.316.721 €",
                 "subida": "0 €",
                 "pts": "12"
-            },
-            {
-                "nombre": "Jonny",
-                "equipo": "LaLiga",
-                "pos": "DEF",
-                "precio": "5.465.004 €",
-                "subida": "0 €",
-                "pts": "7"
             },
             {
                 "nombre": "Guridi",
                 "equipo": "Sevilla FC",
                 "pos": "MED",
-                "precio": "5.016.985 €",
+                "precio": "5.214.696 €",
                 "subida": "0 €",
                 "pts": "9"
-            },
-            {
-                "nombre": "González de Zárate",
-                "equipo": "RCD Espanyol",
-                "pos": "MED",
-                "precio": "4.722.490 €",
-                "subida": "0 €",
-                "pts": "6"
-            },
-            {
-                "nombre": "Riedel",
-                "equipo": "RCD Espanyol",
-                "pos": "DEF",
-                "precio": "4.462.209 €",
-                "subida": "0 €",
-                "pts": "8"
             },
             {
                 "nombre": "Unai Núñez",
                 "equipo": "RCD Espanyol",
                 "pos": "DEF",
-                "precio": "3.706.754 €",
+                "precio": "3.905.720 €",
                 "subida": "0 €",
                 "pts": "10"
             },
             {
-                "nombre": "Agirrezabala",
+                "nombre": "Marc Aguado",
                 "equipo": "LaLiga",
-                "pos": "POR",
-                "precio": "2.802.725 €",
+                "pos": "MED",
+                "precio": "3.506.001 €",
                 "subida": "0 €",
-                "pts": "5"
+                "pts": "11"
             },
             {
                 "nombre": "Peque",
                 "equipo": "Sevilla FC",
                 "pos": "DEL",
-                "precio": "1.837.850 €",
+                "precio": "1.926.039 €",
                 "subida": "0 €",
                 "pts": "9"
             },
@@ -189,23 +101,15 @@
                 "nombre": "Mariano Díaz",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "1.091.310 €",
+                "precio": "1.257.410 €",
                 "subida": "0 €",
                 "pts": "17"
-            },
-            {
-                "nombre": "Ville Koski",
-                "equipo": "LaLiga",
-                "pos": "DEF",
-                "precio": "844.958 €",
-                "subida": "0 €",
-                "pts": "8"
             },
             {
                 "nombre": "Mikel Rodríguez",
                 "equipo": "LaLiga",
                 "pos": "MED",
-                "precio": "841.502 €",
+                "precio": "878.951 €",
                 "subida": "0 €",
                 "pts": "9"
             }
