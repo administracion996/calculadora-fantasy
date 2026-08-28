@@ -2,154 +2,154 @@
     "laliga": {
         "chollos": [
             {
+                "nombre": "Mbappé",
+                "equipo": "Real Madrid",
+                "pos": "DEL",
+                "precio": "130.611.357 €",
+                "subida": "0 €",
+                "pts": "27"
+            },
+            {
                 "nombre": "Raphinha",
                 "equipo": "FC Barcelona",
                 "pos": "DEL",
-                "precio": "102.136.168 €",
+                "precio": "106.520.105 €",
                 "subida": "0 €",
-                "pts": "24"
+                "pts": "39"
+            },
+            {
+                "nombre": "Bellingham",
+                "equipo": "Real Madrid",
+                "pos": "MED",
+                "precio": "98.367.964 €",
+                "subida": "0 €",
+                "pts": "28"
             },
             {
                 "nombre": "Fermín López",
                 "equipo": "FC Barcelona",
                 "pos": "MED",
-                "precio": "77.855.000 €",
+                "precio": "81.329.479 €",
                 "subida": "0 €",
-                "pts": "19"
+                "pts": "32"
             },
             {
                 "nombre": "Mikautadze",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "69.651.107 €",
+                "precio": "72.282.184 €",
                 "subida": "0 €",
                 "pts": "23"
             },
             {
-                "nombre": "Antony",
-                "equipo": "Real Betis",
-                "pos": "DEL",
-                "precio": "65.937.223 €",
+                "nombre": "Joan García",
+                "equipo": "FC Barcelona",
+                "pos": "POR",
+                "precio": "71.869.252 €",
                 "subida": "0 €",
-                "pts": "15"
+                "pts": "23"
+            },
+            {
+                "nombre": "Arda Güler",
+                "equipo": "Real Madrid",
+                "pos": "MED",
+                "precio": "67.974.375 €",
+                "subida": "0 €",
+                "pts": "18"
             },
             {
                 "nombre": "Nicolas Pépé",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "64.607.793 €",
+                "precio": "66.102.065 €",
                 "subida": "0 €",
                 "pts": "19"
             },
             {
-                "nombre": "Fornals",
-                "equipo": "Real Betis",
-                "pos": "MED",
-                "precio": "59.300.203 €",
+                "nombre": "Eric García",
+                "equipo": "FC Barcelona",
+                "pos": "DEF",
+                "precio": "52.086.540 €",
                 "subida": "0 €",
-                "pts": "16"
-            },
-            {
-                "nombre": "Kang-In Lee",
-                "equipo": "Atlético de Madrid",
-                "pos": "MED",
-                "precio": "48.966.230 €",
-                "subida": "0 €",
-                "pts": "16"
+                "pts": "19"
             },
             {
                 "nombre": "Aubameyang",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "48.282.390 €",
+                "precio": "51.822.107 €",
                 "subida": "0 €",
                 "pts": "20"
             },
             {
-                "nombre": "Cucho Hernández",
-                "equipo": "Real Betis",
-                "pos": "DEL",
-                "precio": "45.233.247 €",
-                "subida": "0 €",
-                "pts": "14"
-            },
-            {
-                "nombre": "Hancko",
-                "equipo": "Atlético de Madrid",
+                "nombre": "Gerard Martín",
+                "equipo": "FC Barcelona",
                 "pos": "DEF",
-                "precio": "43.938.097 €",
+                "precio": "42.498.685 €",
                 "subida": "0 €",
-                "pts": "15"
-            },
-            {
-                "nombre": "Dmitrovic",
-                "equipo": "RCD Espanyol",
-                "pos": "POR",
-                "precio": "41.905.585 €",
-                "subida": "0 €",
-                "pts": "16"
-            },
-            {
-                "nombre": "Giuliano Simeone",
-                "equipo": "Atlético de Madrid",
-                "pos": "DEL",
-                "precio": "41.281.126 €",
-                "subida": "0 €",
-                "pts": "15"
-            },
-            {
-                "nombre": "Sivera",
-                "equipo": "LaLiga",
-                "pos": "POR",
-                "precio": "37.730.048 €",
-                "subida": "0 €",
-                "pts": "18"
+                "pts": "20"
             },
             {
                 "nombre": "Álvaro Valles",
                 "equipo": "Real Betis",
                 "pos": "POR",
-                "precio": "37.088.167 €",
+                "precio": "39.264.326 €",
                 "subida": "0 €",
                 "pts": "27"
+            },
+            {
+                "nombre": "Sivera",
+                "equipo": "LaLiga",
+                "pos": "POR",
+                "precio": "38.180.229 €",
+                "subida": "0 €",
+                "pts": "18"
+            },
+            {
+                "nombre": "Catena",
+                "equipo": "CA Osasuna",
+                "pos": "DEF",
+                "precio": "30.876.047 €",
+                "subida": "0 €",
+                "pts": "16"
             },
             {
                 "nombre": "David Soria",
                 "equipo": "Getafe CF",
                 "pos": "POR",
-                "precio": "25.899.108 €",
+                "precio": "27.370.919 €",
                 "subida": "0 €",
                 "pts": "19"
-            },
-            {
-                "nombre": "Vlachodimos",
-                "equipo": "Sevilla FC",
-                "pos": "POR",
-                "precio": "23.459.405 €",
-                "subida": "0 €",
-                "pts": "16"
             },
             {
                 "nombre": "Nahuel Tenaglia",
                 "equipo": "LaLiga",
                 "pos": "DEF",
-                "precio": "21.457.530 €",
+                "precio": "22.515.722 €",
                 "subida": "0 €",
-                "pts": "21"
+                "pts": "22"
             },
             {
-                "nombre": "Dimitrievski",
-                "equipo": "Valencia CF",
-                "pos": "POR",
-                "precio": "17.467.839 €",
+                "nombre": "Íñigo Vicente",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "21.903.110 €",
                 "subida": "0 €",
-                "pts": "15"
+                "pts": "24"
+            },
+            {
+                "nombre": "Andrés Martín",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "21.898.407 €",
+                "subida": "0 €",
+                "pts": "18"
             },
             {
                 "nombre": "Ryan",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "13.993.027 €",
+                "precio": "14.946.083 €",
                 "subida": "0 €",
                 "pts": "19"
             },
@@ -157,7 +157,7 @@
                 "nombre": "Oso",
                 "equipo": "Sevilla FC",
                 "pos": "DEF",
-                "precio": "13.683.532 €",
+                "precio": "14.611.722 €",
                 "subida": "0 €",
                 "pts": "18"
             },
@@ -165,49 +165,49 @@
                 "nombre": "Roberto Fernández",
                 "equipo": "RCD Espanyol",
                 "pos": "DEL",
-                "precio": "12.710.505 €",
+                "precio": "13.979.389 €",
                 "subida": "0 €",
                 "pts": "19"
             },
             {
-                "nombre": "Fran García",
-                "equipo": "Real Betis",
-                "pos": "DEF",
-                "precio": "12.329.561 €",
+                "nombre": "Ángel Pérez",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "7.728.645 €",
                 "subida": "0 €",
                 "pts": "16"
             },
             {
-                "nombre": "Djené",
-                "equipo": "Getafe CF",
-                "pos": "DEF",
-                "precio": "10.923.694 €",
+                "nombre": "Agirrezabala",
+                "equipo": "LaLiga",
+                "pos": "POR",
+                "precio": "6.521.925 €",
                 "subida": "0 €",
-                "pts": "14"
-            },
-            {
-                "nombre": "César Tárrega",
-                "equipo": "Valencia CF",
-                "pos": "DEF",
-                "precio": "10.039.656 €",
-                "subida": "0 €",
-                "pts": "14"
-            },
-            {
-                "nombre": "Rodrigo Riquelme",
-                "equipo": "Real Betis",
-                "pos": "MED",
-                "precio": "6.060.387 €",
-                "subida": "0 €",
-                "pts": "16"
+                "pts": "17"
             },
             {
                 "nombre": "Mariano Díaz",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "4.541.919 €",
+                "precio": "5.480.735 €",
                 "subida": "0 €",
                 "pts": "25"
+            },
+            {
+                "nombre": "Zabiri",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "4.073.008 €",
+                "subida": "0 €",
+                "pts": "23"
+            },
+            {
+                "nombre": "Xavi Espart",
+                "equipo": "FC Barcelona",
+                "pos": "DEF",
+                "precio": "1.251.148 €",
+                "subida": "0 €",
+                "pts": "21"
             }
         ]
     }
