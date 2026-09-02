@@ -5,7 +5,7 @@
                 "nombre": "Mbappé",
                 "equipo": "Real Madrid",
                 "pos": "DEL",
-                "precio": "134.853.708 €",
+                "precio": "136.399.145 €",
                 "subida": "0 €",
                 "pts": "41"
             },
@@ -13,7 +13,7 @@
                 "nombre": "Lamine Yamal",
                 "equipo": "FC Barcelona",
                 "pos": "DEL",
-                "precio": "123.628.428 €",
+                "precio": "124.150.329 €",
                 "subida": "0 €",
                 "pts": "30"
             },
@@ -21,7 +21,7 @@
                 "nombre": "Raphinha",
                 "equipo": "FC Barcelona",
                 "pos": "DEL",
-                "precio": "116.507.582 €",
+                "precio": "119.942.690 €",
                 "subida": "0 €",
                 "pts": "55"
             },
@@ -29,7 +29,7 @@
                 "nombre": "Bellingham",
                 "equipo": "Real Madrid",
                 "pos": "MED",
-                "precio": "106.843.938 €",
+                "precio": "109.059.441 €",
                 "subida": "0 €",
                 "pts": "44"
             },
@@ -37,7 +37,7 @@
                 "nombre": "Vinícius Júnior",
                 "equipo": "Real Madrid",
                 "pos": "DEL",
-                "precio": "103.771.361 €",
+                "precio": "104.132.450 €",
                 "subida": "0 €",
                 "pts": "28"
             },
@@ -45,23 +45,23 @@
                 "nombre": "Fermín López",
                 "equipo": "FC Barcelona",
                 "pos": "MED",
-                "precio": "90.485.472 €",
+                "precio": "91.445.773 €",
                 "subida": "0 €",
                 "pts": "36"
-            },
-            {
-                "nombre": "Joan García",
-                "equipo": "FC Barcelona",
-                "pos": "POR",
-                "precio": "73.615.131 €",
-                "subida": "0 €",
-                "pts": "27"
             },
             {
                 "nombre": "Arda Güler",
                 "equipo": "Real Madrid",
                 "pos": "MED",
-                "precio": "73.089.457 €",
+                "precio": "75.102.038 €",
+                "subida": "0 €",
+                "pts": "27"
+            },
+            {
+                "nombre": "Joan García",
+                "equipo": "FC Barcelona",
+                "pos": "POR",
+                "precio": "73.877.540 €",
                 "subida": "0 €",
                 "pts": "27"
             },
@@ -69,7 +69,7 @@
                 "nombre": "Mikautadze",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "71.629.886 €",
+                "precio": "70.443.630 €",
                 "subida": "0 €",
                 "pts": "25"
             },
@@ -77,7 +77,7 @@
                 "nombre": "Nicolas Pépé",
                 "equipo": "Villarreal CF",
                 "pos": "DEL",
-                "precio": "67.826.581 €",
+                "precio": "67.330.310 €",
                 "subida": "0 €",
                 "pts": "25"
             },
@@ -85,7 +85,7 @@
                 "nombre": "Aubameyang",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "60.737.678 €",
+                "precio": "62.772.649 €",
                 "subida": "0 €",
                 "pts": "31"
             },
@@ -93,7 +93,7 @@
                 "nombre": "Álex Baena",
                 "equipo": "Atlético de Madrid",
                 "pos": "MED",
-                "precio": "58.289.965 €",
+                "precio": "60.463.380 €",
                 "subida": "0 €",
                 "pts": "29"
             },
@@ -101,7 +101,7 @@
                 "nombre": "Kang-In Lee",
                 "equipo": "Atlético de Madrid",
                 "pos": "MED",
-                "precio": "57.783.641 €",
+                "precio": "60.160.244 €",
                 "subida": "0 €",
                 "pts": "26"
             },
@@ -109,7 +109,7 @@
                 "nombre": "Budimir",
                 "equipo": "CA Osasuna",
                 "pos": "DEL",
-                "precio": "49.278.921 €",
+                "precio": "50.310.864 €",
                 "subida": "0 €",
                 "pts": "26"
             },
@@ -117,7 +117,7 @@
                 "nombre": "Álvaro Valles",
                 "equipo": "Real Betis",
                 "pos": "POR",
-                "precio": "42.389.995 €",
+                "precio": "42.210.517 €",
                 "subida": "0 €",
                 "pts": "27"
             },
@@ -125,7 +125,7 @@
                 "nombre": "Sivera",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "40.474.716 €",
+                "precio": "41.024.935 €",
                 "subida": "0 €",
                 "pts": "30"
             },
@@ -133,7 +133,7 @@
                 "nombre": "Catena",
                 "equipo": "CA Osasuna",
                 "pos": "DEF",
-                "precio": "32.769.900 €",
+                "precio": "33.547.665 €",
                 "subida": "0 €",
                 "pts": "24"
             },
@@ -141,7 +141,7 @@
                 "nombre": "David Soria",
                 "equipo": "Getafe CF",
                 "pos": "POR",
-                "precio": "30.806.263 €",
+                "precio": "31.406.659 €",
                 "subida": "0 €",
                 "pts": "23"
             },
@@ -149,7 +149,7 @@
                 "nombre": "Nahuel Tenaglia",
                 "equipo": "LaLiga",
                 "pos": "DEF",
-                "precio": "26.135.707 €",
+                "precio": "27.458.120 €",
                 "subida": "0 €",
                 "pts": "30"
             },
@@ -157,47 +157,47 @@
                 "nombre": "Íñigo Vicente",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "24.427.657 €",
+                "precio": "24.946.825 €",
                 "subida": "0 €",
                 "pts": "24"
-            },
-            {
-                "nombre": "Ryan",
-                "equipo": "LaLiga",
-                "pos": "POR",
-                "precio": "17.243.307 €",
-                "subida": "0 €",
-                "pts": "26"
             },
             {
                 "nombre": "Roberto Fernández",
                 "equipo": "RCD Espanyol",
                 "pos": "DEL",
-                "precio": "17.025.536 €",
+                "precio": "18.331.663 €",
                 "subida": "0 €",
                 "pts": "27"
             },
             {
-                "nombre": "Ángel Pérez",
+                "nombre": "Ryan",
                 "equipo": "LaLiga",
-                "pos": "DEL",
-                "precio": "9.224.166 €",
+                "pos": "POR",
+                "precio": "18.149.826 €",
                 "subida": "0 €",
-                "pts": "24"
+                "pts": "26"
             },
             {
                 "nombre": "Rodrigo Riquelme",
                 "equipo": "Real Betis",
                 "pos": "MED",
-                "precio": "9.088.296 €",
+                "precio": "9.804.148 €",
                 "subida": "0 €",
                 "pts": "26"
+            },
+            {
+                "nombre": "Ángel Pérez",
+                "equipo": "LaLiga",
+                "pos": "DEL",
+                "precio": "9.587.812 €",
+                "subida": "0 €",
+                "pts": "24"
             },
             {
                 "nombre": "Mariano Díaz",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "7.507.168 €",
+                "precio": "7.900.741 €",
                 "subida": "0 €",
                 "pts": "25"
             },
@@ -205,7 +205,7 @@
                 "nombre": "Xavi Espart",
                 "equipo": "FC Barcelona",
                 "pos": "DEF",
-                "precio": "3.260.596 €",
+                "precio": "4.466.830 €",
                 "subida": "0 €",
                 "pts": "29"
             }
