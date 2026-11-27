@@ -5,7 +5,7 @@
                 "nombre": "Mbappé",
                 "equipo": "Real Madrid",
                 "pos": "DEL",
-                "precio": "185.037.167 €",
+                "precio": "185.220.620 €",
                 "subida": "0 €",
                 "pts": "156"
             },
@@ -13,7 +13,7 @@
                 "nombre": "Lamine Yamal",
                 "equipo": "FC Barcelona",
                 "pos": "DEL",
-                "precio": "179.768.886 €",
+                "precio": "179.921.196 €",
                 "subida": "0 €",
                 "pts": "166"
             },
@@ -21,7 +21,7 @@
                 "nombre": "Raphinha",
                 "equipo": "FC Barcelona",
                 "pos": "DEL",
-                "precio": "164.457.347 €",
+                "precio": "163.796.749 €",
                 "subida": "0 €",
                 "pts": "148"
             },
@@ -29,7 +29,7 @@
                 "nombre": "Bellingham",
                 "equipo": "Real Madrid",
                 "pos": "MED",
-                "precio": "161.160.747 €",
+                "precio": "162.781.716 €",
                 "subida": "0 €",
                 "pts": "131"
             },
@@ -37,7 +37,7 @@
                 "nombre": "Arda Güler",
                 "equipo": "Real Madrid",
                 "pos": "MED",
-                "precio": "151.327.357 €",
+                "precio": "151.232.883 €",
                 "subida": "0 €",
                 "pts": "131"
             },
@@ -45,7 +45,7 @@
                 "nombre": "Fermín López",
                 "equipo": "FC Barcelona",
                 "pos": "MED",
-                "precio": "131.846.243 €",
+                "precio": "128.739.316 €",
                 "subida": "0 €",
                 "pts": "117"
             },
@@ -53,7 +53,7 @@
                 "nombre": "Diomande",
                 "equipo": "Real Madrid",
                 "pos": "DEL",
-                "precio": "117.422.715 €",
+                "precio": "115.866.182 €",
                 "subida": "0 €",
                 "pts": "85"
             },
@@ -61,31 +61,31 @@
                 "nombre": "Álex Baena",
                 "equipo": "Atlético de Madrid",
                 "pos": "MED",
-                "precio": "95.064.344 €",
+                "precio": "96.979.710 €",
                 "subida": "0 €",
                 "pts": "102"
-            },
-            {
-                "nombre": "Isco",
-                "equipo": "Real Betis",
-                "pos": "MED",
-                "precio": "91.347.455 €",
-                "subida": "0 €",
-                "pts": "86"
             },
             {
                 "nombre": "Grimaldo",
                 "equipo": "Atlético de Madrid",
                 "pos": "DEF",
-                "precio": "91.158.117 €",
+                "precio": "93.026.995 €",
                 "subida": "0 €",
                 "pts": "110"
+            },
+            {
+                "nombre": "Isco",
+                "equipo": "Real Betis",
+                "pos": "MED",
+                "precio": "91.899.301 €",
+                "subida": "0 €",
+                "pts": "86"
             },
             {
                 "nombre": "Zabiri",
                 "equipo": "LaLiga",
                 "pos": "DEL",
-                "precio": "69.499.756 €",
+                "precio": "71.460.499 €",
                 "subida": "0 €",
                 "pts": "94"
             },
@@ -93,7 +93,7 @@
                 "nombre": "Budimir",
                 "equipo": "CA Osasuna",
                 "pos": "DEL",
-                "precio": "65.712.182 €",
+                "precio": "66.623.061 €",
                 "subida": "0 €",
                 "pts": "97"
             },
@@ -101,7 +101,7 @@
                 "nombre": "Alberto Moleiro",
                 "equipo": "Villarreal CF",
                 "pos": "MED",
-                "precio": "63.843.325 €",
+                "precio": "63.688.234 €",
                 "subida": "0 €",
                 "pts": "88"
             },
@@ -109,7 +109,7 @@
                 "nombre": "Hancko",
                 "equipo": "Atlético de Madrid",
                 "pos": "DEF",
-                "precio": "60.272.856 €",
+                "precio": "61.253.092 €",
                 "subida": "0 €",
                 "pts": "84"
             },
@@ -117,7 +117,7 @@
                 "nombre": "Courtois",
                 "equipo": "Real Madrid",
                 "pos": "POR",
-                "precio": "59.216.483 €",
+                "precio": "58.618.549 €",
                 "subida": "0 €",
                 "pts": "88"
             },
@@ -125,7 +125,7 @@
                 "nombre": "Mario Soriano",
                 "equipo": "LaLiga",
                 "pos": "MED",
-                "precio": "56.319.160 €",
+                "precio": "55.258.250 €",
                 "subida": "0 €",
                 "pts": "83"
             },
@@ -133,7 +133,7 @@
                 "nombre": "Kang-In Lee",
                 "equipo": "Atlético de Madrid",
                 "pos": "MED",
-                "precio": "53.368.181 €",
+                "precio": "52.969.052 €",
                 "subida": "0 €",
                 "pts": "83"
             },
@@ -141,7 +141,7 @@
                 "nombre": "Álvaro Valles",
                 "equipo": "Real Betis",
                 "pos": "POR",
-                "precio": "48.143.714 €",
+                "precio": "47.857.998 €",
                 "subida": "0 €",
                 "pts": "118"
             },
@@ -149,7 +149,7 @@
                 "nombre": "Joan García",
                 "equipo": "FC Barcelona",
                 "pos": "POR",
-                "precio": "47.690.112 €",
+                "precio": "47.147.518 €",
                 "subida": "0 €",
                 "pts": "81"
             },
@@ -157,7 +157,7 @@
                 "nombre": "Oblak",
                 "equipo": "Atlético de Madrid",
                 "pos": "POR",
-                "precio": "44.099.104 €",
+                "precio": "44.070.623 €",
                 "subida": "0 €",
                 "pts": "104"
             },
@@ -165,7 +165,7 @@
                 "nombre": "Radu",
                 "equipo": "RC Celta",
                 "pos": "POR",
-                "precio": "42.388.584 €",
+                "precio": "41.880.749 €",
                 "subida": "0 €",
                 "pts": "110"
             },
@@ -173,7 +173,7 @@
                 "nombre": "Unai Simón",
                 "equipo": "Athletic Club",
                 "pos": "POR",
-                "precio": "37.661.991 €",
+                "precio": "37.378.823 €",
                 "subida": "0 €",
                 "pts": "96"
             },
@@ -181,7 +181,7 @@
                 "nombre": "Sivera",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "26.947.651 €",
+                "precio": "26.494.351 €",
                 "subida": "0 €",
                 "pts": "94"
             },
@@ -189,7 +189,7 @@
                 "nombre": "David Soria",
                 "equipo": "Getafe CF",
                 "pos": "POR",
-                "precio": "23.367.289 €",
+                "precio": "23.017.891 €",
                 "subida": "0 €",
                 "pts": "82"
             },
@@ -197,7 +197,7 @@
                 "nombre": "Ryan",
                 "equipo": "LaLiga",
                 "pos": "POR",
-                "precio": "16.931.555 €",
+                "precio": "16.753.632 €",
                 "subida": "0 €",
                 "pts": "85"
             },
@@ -205,7 +205,7 @@
                 "nombre": "Dimitrievski",
                 "equipo": "Valencia CF",
                 "pos": "POR",
-                "precio": "16.197.522 €",
+                "precio": "16.249.395 €",
                 "subida": "0 €",
                 "pts": "85"
             }
